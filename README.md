@@ -142,7 +142,7 @@ resources/views/
 
 ## 👤 Author
 
-**Khatami** — Sistem Irigasi Rawa berbasis AI  
+**Muhammad Sauqi Khatami** — Sistem Irigasi Rawa berbasis AI  
 [github.com/khatami99](https://github.com/khatami99)
 
 ---
