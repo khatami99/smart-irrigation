@@ -1,59 +1,121 @@
-💧 Smart Irrigation System
+# 💧 Smart Irrigation System
+
 Sistem monitoring dan prediksi kebutuhan air irigasi rawa berbasis web, dilengkapi dengan model Machine Learning (Linear Regression) untuk memperkirakan kebutuhan air esok hari secara otomatis.
 
-🚀 Fitur
+---
 
-Autentikasi — Login & logout dengan proteksi middleware
-Dashboard Monitoring — Visualisasi tren kebutuhan air dengan Chart.js
-Prediksi AI — Estimasi kebutuhan air 24 jam ke depan menggunakan Linear Regression (Python)
-CRUD Data Irigasi — Tambah, edit, dan hapus data harian
-Kalkulasi Otomatis — ETo dihitung otomatis dengan metode Penman-Monteith FAO-56, ETc dan kebutuhan air menyesuaikan
-Preview Real-time — Hasil kalkulasi ETo, ETc, dan kebutuhan air langsung terlihat saat mengisi form
-Pagination AJAX — Navigasi tabel tanpa reload halaman
-Page Transition — Loading overlay dan loading bar saat berpindah halaman
+## 🚀 Fitur
 
+- **Autentikasi** — Login & logout dengan proteksi middleware
+- **Dashboard Monitoring** — Visualisasi tren kebutuhan air dengan Chart.js
+- **Prediksi AI** — Estimasi kebutuhan air 24 jam ke depan menggunakan Linear Regression (Python)
+- **CRUD Data Irigasi** — Tambah, edit, dan hapus data harian
+- **Kalkulasi Otomatis** — ETo dihitung otomatis dengan metode **Penman-Monteith FAO-56**, ETc dan kebutuhan air menyesuaikan
+- **Preview Real-time** — Hasil kalkulasi ETo, ETc, dan kebutuhan air langsung terlihat saat mengisi form
+- **Pagination AJAX** — Navigasi tabel tanpa reload halaman
+- **Page Transition** — Loading overlay dan loading bar saat berpindah halaman
 
-🛠️ Tech Stack
-LayerTeknologiBackendLaravel 12 (PHP)FrontendBlade + Tailwind CSSDatabaseMySQLMachine LearningPython (Linear Regression)ChartChart.jsServer LokalLaragon
+---
 
-⚙️ Instalasi
-1. Clone repository
-bashgit clone https://github.com/khatami99/smart-irrigation.git
+## 🛠️ Tech Stack
+
+| Layer | Teknologi |
+|---|---|
+| Backend | Laravel 11 (PHP) |
+| Frontend | Blade + Tailwind CSS |
+| Database | MySQL |
+| Machine Learning | Python (Linear Regression) |
+| Chart | Chart.js |
+| Server Lokal | Laragon |
+
+---
+
+## ⚙️ Instalasi
+
+### 1. Clone repository
+
+```bash
+git clone https://github.com/khatami99/smart-irrigation.git
 cd smart-irrigation
-2. Install dependencies
-bashcomposer install
+```
+
+### 2. Install dependencies
+
+```bash
+composer install
 npm install
-3. Konfigurasi environment
-bashcp .env.example .env
+```
+
+### 3. Konfigurasi environment
+
+```bash
+cp .env.example .env
 php artisan key:generate
-Edit file .env sesuaikan konfigurasi database:
-envDB_CONNECTION=mysql
+```
+
+Edit file `.env` sesuaikan konfigurasi database:
+
+```env
+DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
 DB_DATABASE=smart_irrigation
 DB_USERNAME=root
 DB_PASSWORD=
-4. Jalankan migration
-bashphp artisan migrate
-5. Buat user pertama
-bashphp artisan tinker
+```
+
+### 4. Jalankan migration
+
+```bash
+php artisan migrate
+```
+
+### 5. Buat user pertama
+
+```bash
+php artisan tinker
 \App\Models\User::create([
     'name' => 'Admin',
     'email' => 'admin@example.com',
     'password' => bcrypt('password123'),
 ]);
-6. Jalankan aplikasi
-bashphp artisan serve
-Atau akses langsung via Laragon di http://smart-irrigation.test
+```
 
-📐 Kalkulasi ETo (Penman-Monteith FAO-56)
+### 6. Jalankan aplikasi
+
+```bash
+php artisan serve
+```
+
+Atau akses langsung via Laragon di `http://smart-irrigation.test`
+
+---
+
+## 📐 Kalkulasi ETo (Penman-Monteith FAO-56)
+
 ETo dihitung otomatis dari data iklim yang diinput:
-Parameter InputSatuanSuhu Maksimum°CSuhu Minimum°CKelembaban Udara%Kecepatan Anginm/sRadiasi MatahariMJ/m²/hariKoefisien Tanaman (Kc)-Curah Hujanmm
-Rumus:
+
+| Parameter Input | Satuan |
+|---|---|
+| Suhu Maksimum | °C |
+| Suhu Minimum | °C |
+| Kelembaban Udara | % |
+| Kecepatan Angin | m/s |
+| Radiasi Matahari | MJ/m²/hari |
+| Koefisien Tanaman (Kc) | - |
+| Curah Hujan | mm |
+
+**Rumus:**
+```
 ETc  = ETo × Kc
 Kebutuhan Air = ETc - (Curah Hujan × 0.8)
+```
 
-📁 Struktur Direktori Penting
+---
+
+## 📁 Struktur Direktori Penting
+
+```
 app/
 ├── Http/Controllers/
 │   ├── AuthController.php
@@ -74,10 +136,17 @@ resources/views/
 │       └── table.blade.php         ← tabel AJAX
 └── auth/
     └── login.blade.php
+```
 
-👤 Author
-Khatami — Sistem Irigasi Rawa berbasis AI
-github.com/khatami99
+---
 
-📄 Lisensi
+## 👤 Author
+
+**Khatami** — Sistem Irigasi Rawa berbasis AI  
+[github.com/khatami99](https://github.com/khatami99)
+
+---
+
+## 📄 Lisensi
+
 Proyek ini dibuat untuk keperluan pengembangan sistem informasi irigasi rawa.
