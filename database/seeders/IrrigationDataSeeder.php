@@ -14,20 +14,25 @@ class IrrigationDataSeeder extends Seeder
      */
     public function run(): void
     {
-        for ($i = 1; $i <= 30; $i++) {
+        $startDate = Carbon::now()->subDays(300);
 
-        $eto = rand(40, 60) / 10; // 4.0 - 6.0
-        $etc = $eto * 1.1;
-        $curah = rand(0, 20);
-        $kebutuhan = ($etc * 10) - $curah;
+        for ($i = 0; $i < 20; $i++) {
+            $eto = rand(40, 60) / 10;
+            $etc = number_format($eto * 1.1, 2);
+            $curah = rand(0, 20);
 
-        IrrigationData::create([
-            'tanggal' => Carbon::now()->subDays(30 - $i),
-            'eto' => $eto,
-            'etc' => $etc,
-            'curah_hujan' => $curah,
-            'kebutuhan_air' => $kebutuhan
-        ]);
+            // Rumus kebutuhan air sederhana
+            $kebutuhan = number_format(($etc * 10) - $curah, 2);
+            if ($kebutuhan < 0) $kebutuhan = 0; // Biar nggak ada angka minus kalau hujan deres
+
+            IrrigationData::create([
+                // KUNCINYA DI SINI: Tiap looping, tanggalnya nambah 15 hari
+                'tanggal' => $startDate->copy()->addDays($i * 15)->format('Y-m-d'),
+                'eto' => $eto,
+                'etc' => $etc,
+                'curah_hujan' => $curah,
+                'kebutuhan_air' => $kebutuhan
+            ]);
         }
     }
 }
