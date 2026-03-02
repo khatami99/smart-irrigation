@@ -122,13 +122,13 @@
             {{-- Nav --}}
             <nav style="padding:1rem .75rem;flex:1;">
                 <p style="font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(232,213,163,.3);padding:.5rem .5rem;margin-bottom:.25rem;">Menu</p>
-                <a href="{{ route('irrigation') }}"
-                   class="nav-item {{ request()->routeIs('irrigation') ? 'active' : '' }}">
+                <a href="{{ route('dashboard') }}"
+                   class="nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
                     <span style="font-size:1rem;margin-right:.65rem;">📊</span> Dashboard
                 </a>
-                <a href="{{ route('irrigation.create') }}"
-                   class="nav-item {{ request()->routeIs('irrigation.create') ? 'active' : '' }}">
-                    <span style="font-size:1rem;margin-right:.65rem;">🗃️</span> Data
+                <a href="{{ route('irrigation.index') }}"
+                   class="nav-item {{ request()->routeIs('irrigation.index') ? 'active' : '' }}">
+                    <span style="font-size:1rem;margin-right:.65rem;">🗃️</span> Data Iklim
                 </a>
                 @can('view petak')
                 <a href="{{ route('petak.index') }}"
@@ -155,6 +155,13 @@
                 class="nav-item {{ request()->routeIs('grafik.*') ? 'active' : '' }}">
                     <span style="font-size:1rem;margin-right:.65rem;">📈</span> Grafik & Analisis
                 </a>
+
+                @can('view rtt')
+                <a href="{{ route('rtt.index') }}"
+                class="nav-item {{ request()->routeIs('rtt.*') ? 'active' : '' }}">
+                    <span style="font-size:1rem;margin-right:.65rem;">🗓️</span> RTT
+                </a>
+                @endcan
             </nav>
 
             {{-- User --}}

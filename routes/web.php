@@ -7,6 +7,7 @@ use App\Http\Controllers\PetakController;
 use App\Http\Controllers\MusimTanamController;
 use App\Http\Controllers\BlangkoOpController;
 use App\Http\Controllers\GrafikController;
+use App\Http\Controllers\RttController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -17,7 +18,9 @@ Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/irrigation', [IrrigationController::class, 'index'])->name('irrigation');
+    // Route::get('/irrigation', [IrrigationController::class, 'index'])->name('irrigation.index');
+    Route::get('/dashboard', [IrrigationController::class, 'index'])->name('dashboard');
+    Route::get('/irrigation', [IrrigationController::class, 'dataIklim'])->name('irrigation.index');
     Route::get('/irrigation/create', [IrrigationController::class, 'create'])->name('irrigation.create');
     Route::post('/irrigation', [IrrigationController::class, 'store'])->name('irrigation.store');
     Route::get('/irrigation/{irrigationData}/edit', [IrrigationController::class, 'edit'])->name('irrigation.edit');
@@ -28,4 +31,5 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('blangko-op', BlangkoOpController::class)->except(['show']);
     Route::get('/grafik', [GrafikController::class, 'index'])->name('grafik.index');
     Route::get('/grafik/data', [GrafikController::class, 'data'])->name('grafik.data');
+    Route::resource('rtt', RttController::class)->except(['show']);
 });

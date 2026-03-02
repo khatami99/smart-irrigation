@@ -51,6 +51,12 @@ class RolePermissionSeeder extends Seeder
             'create users',
             'edit users',
             'delete users',
+
+            // RTT
+            'view rtt',
+            'create rtt',
+            'edit rtt',
+            'delete rtt',
         ];
 
         foreach ($permissions as $perm) {
@@ -69,6 +75,9 @@ class RolePermissionSeeder extends Seeder
             'view musim-tanam',
             'view blangko-op', 'create blangko-op', 'edit blangko-op', // ← bisa input & edit
             'view laporan',
+            'view rtt',
+            'create rtt',
+            'edit rtt',
         ]);
 
         // ── DINAS — lihat & validasi laporan ──
@@ -79,6 +88,7 @@ class RolePermissionSeeder extends Seeder
             'view musim-tanam',
             'view blangko-op', // ← hanya lihat
             'view laporan', 'export laporan',
+            'view rtt',
         ]);
 
         // ── PETANI — hanya lihat data umum ──

@@ -32,6 +32,12 @@ class IrrigationController extends Controller
         return view('irrigation.index', compact('labels', 'kebutuhan', 'forecast', 'recommendation', 'tableData'));
     }
 
+    public function dataIklim()
+    {
+        $tableData = IrrigationData::orderBy('tanggal', 'desc')->paginate(15);
+        return view('irrigation.data', compact('tableData'));
+    }
+
     public function create()
     {
         return view('irrigation.create');
