@@ -47,7 +47,7 @@
 
 <div style="max-width:680px;margin:0 auto;">
 
-    <a href="{{ route('irrigation') }}" style="display:inline-flex;align-items:center;gap:.4rem;font-size:.82rem;color:var(--textlt);text-decoration:none;margin-bottom:1.25rem;transition:color .2s;"
+    <a href="{{ route('irrigation.index') }}" style="display:inline-flex;align-items:center;gap:.4rem;font-size:.82rem;color:var(--textlt);text-decoration:none;margin-bottom:1.25rem;transition:color .2s;"
        onmouseover="this.style.color='var(--water)'" onmouseout="this.style.color='var(--textlt)'">
         ← Kembali ke Dashboard
     </a>
@@ -157,7 +157,7 @@
 
             <div style="display:flex;gap:.75rem;align-items:center;">
                 <button type="submit" class="btn-primary">Simpan Data</button>
-                <a href="{{ route('irrigation') }}" class="btn-cancel">Batal</a>
+                <a href="{{ route('irrigation.index') }}" class="btn-cancel">Batal</a>
             </div>
 
         </form>

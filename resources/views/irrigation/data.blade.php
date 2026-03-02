@@ -23,11 +23,13 @@
         <h2 style="font-family:'Fraunces',serif;font-size:1.6rem;font-weight:700;color:var(--soil);">Data Iklim Harian</h2>
         <p style="font-size:.82rem;color:var(--textlt);margin-top:.2rem;">Suhu, kelembaban, radiasi, dan kebutuhan air per hari</p>
     </div>
+    @can('create data-iklim')
     <a href="{{ route('irrigation.create') }}"
        style="background:var(--soil);color:var(--straw);padding:.65rem 1.4rem;border-radius:8px;font-size:.85rem;font-weight:600;text-decoration:none;"
        onmouseover="this.style.background='var(--soil2)'" onmouseout="this.style.background='var(--soil)'">
         + Tambah Data
     </a>
+    @endcan
 </div>
 
 @if(session('success'))

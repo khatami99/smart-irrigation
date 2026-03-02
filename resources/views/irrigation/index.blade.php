@@ -25,11 +25,13 @@
         <h2 style="font-family:'Fraunces',serif;font-size:1.6rem;font-weight:700;color:var(--soil);letter-spacing:-.02em;">Ringkasan Irigasi</h2>
         <p style="font-size:.82rem;color:var(--textlt);font-weight:300;margin-top:.2rem;">Data diolah dengan algoritma Linear Regression · Metode FAO-56</p>
     </div>
-    <a href="{{ route('irrigation.create') }}"
-       style="background:var(--soil);color:var(--straw);padding:.65rem 1.4rem;border-radius:8px;font-size:.85rem;font-weight:600;text-decoration:none;transition:background .2s;display:inline-flex;align-items:center;gap:.4rem;"
-       onmouseover="this.style.background='var(--soil2)'" onmouseout="this.style.background='var(--soil)'">
-        + Tambah Data
-    </a>
+    @can('create data-iklim')
+        <a href="{{ route('irrigation.create') }}"
+        style="background:var(--soil);color:var(--straw);padding:.65rem 1.4rem;border-radius:8px;font-size:.85rem;font-weight:600;text-decoration:none;transition:background .2s;display:inline-flex;align-items:center;gap:.4rem;"
+        onmouseover="this.style.background='var(--soil2)'" onmouseout="this.style.background='var(--soil)'">
+            + Tambah Data
+        </a>
+    @endcan
 </div>
 
 {{-- Stat Cards --}}

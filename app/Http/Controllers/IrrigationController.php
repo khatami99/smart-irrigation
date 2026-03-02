@@ -76,7 +76,7 @@ class IrrigationController extends Controller
             'kebutuhan_air'    => $kebutuhanAir,
         ]);
 
-        return redirect()->route('irrigation')->with('success', 'Data berhasil ditambahkan!');
+        return redirect()->route('irrigation.index')->with('success', 'Data berhasil ditambahkan!');
     }
 
     public function edit(IrrigationData $irrigationData)
@@ -117,12 +117,12 @@ class IrrigationController extends Controller
             'kebutuhan_air'    => $kebutuhanAir,
         ]);
 
-        return redirect()->route('irrigation')->with('success', 'Data berhasil diperbarui!');
+        return redirect()->route('irrigation.index')->with('success', 'Data berhasil diperbarui!');
     }
 
     public function destroy(IrrigationData $irrigationData)
     {
         $irrigationData->delete();
-        return redirect()->route('irrigation')->with('success', 'Data berhasil dihapus!');
+        return redirect()->route('irrigation.index')->with('success', 'Data berhasil dihapus!');
     }
 }

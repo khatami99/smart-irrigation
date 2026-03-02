@@ -633,7 +633,7 @@
     <footer>
         Smart Irrigation System &copy; {{ date('Y') }} &nbsp;·&nbsp;
         Built by <a href="https://github.com/khatami99">khatami99</a> &nbsp;·&nbsp;
-        Palangkaraya, Kalimantan Tengah
+        Banjarmasin, Kalimantan Selatan
     </footer>
 
     <style>
