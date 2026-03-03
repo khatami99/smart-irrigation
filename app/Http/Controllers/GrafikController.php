@@ -39,8 +39,9 @@ class GrafikController extends Controller
         $mtId  = $request->get('musim_tanam_id');
         $tahun = $request->get('tahun', date('Y'));
         $bulan = $request->get('bulan');
+        $limit = $request->get('limit'); // tambah ini
 
-        $kebutuhanData = $this->getKebutuhanData($mode, $tahun, $bulan, $mtId);
+        $kebutuhanData = $this->getKebutuhanData($mode, $tahun, $bulan, $mtId, $limit);
         $blangkoData   = $this->getBlangkoData($mode, $tahun, $bulan, $mtId);
 
         return response()->json([
@@ -61,7 +62,7 @@ class GrafikController extends Controller
     }
 
     // ──────────────────────────────────────────────
-    private function getKebutuhanData($mode, $tahun, $bulan, $mtId)
+    private function getKebutuhanData($mode, $tahun, $bulan, $mtId, $limit = null)
     {
         $query = IrrigationData::query();
 
@@ -84,7 +85,11 @@ class GrafikController extends Controller
 
         switch ($mode) {
             case 'harian':
-                $data = $query->orderBy('tanggal')->get();
+                if ($limit) $query->orderBy('tanggal', 'desc')->limit($limit);
+                else $query->orderBy('tanggal', 'asc');
+
+                // $data = $query->orderBy('tanggal')->get();
+                $data = $limit ? $query->get()->reverse() : $query->get();
                 foreach ($data as $d) {
                     $labels[]    = $d->tanggal;
                     $kebutuhan[] = round($d->kebutuhan_air, 2);

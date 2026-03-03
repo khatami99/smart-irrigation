@@ -104,6 +104,7 @@
         <div>
             <p style="font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--textlt);margin-bottom:.3rem;">Visualisasi Data</p>
             <h3 style="font-family:'Fraunces',serif;font-size:1.15rem;font-weight:600;color:var(--soil);">Tren Kebutuhan Air</h3>
+            <p style="font-size:.72rem;color:var(--textlt);margin-top:.2rem;">30 hari terakhir · Lihat grafik lengkap untuk analisis lebih detail</p>
         </div>
         <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;">
             <div style="display:flex;gap:.25rem;background:var(--cream2);border:1px solid var(--border);border-radius:8px;padding:.2rem;">
@@ -181,6 +182,12 @@ function gantiModeDashboard(mode, btn) {
     });
     btn.style.background = 'var(--soil)';
     btn.style.color = 'var(--straw)';
+
+    // Harian: pakai data PHP yang sudah 30 hari terakhir
+    if (mode === 'harian') {
+        initDashChart(@json($labels), @json($kebutuhan));
+        return;
+    }
 
     fetch(`{{ route('grafik.data') }}?mode=${mode}`)
     .then(r => r.json())

@@ -24,7 +24,9 @@ class IrrigationController extends Controller
             $recommendation = ['status' => 'Hemat', 'color' => 'text-emerald-400', 'msg' => 'Kebutuhan air rendah. Anda bisa menghemat penggunaan pompa.'];
         }
 
-        $allData   = IrrigationData::orderBy('tanggal', 'asc')->get();
+        $allData   = IrrigationData::orderBy('tanggal', 'asc')
+                        ->where('tanggal', '>=', now()->subDays(30)->format('Y-m-d'))
+                        ->get();
         $labels    = $allData->pluck('tanggal');
         $kebutuhan = $allData->pluck('kebutuhan_air');
         $tableData = IrrigationData::orderBy('tanggal', 'desc')->paginate(10);
