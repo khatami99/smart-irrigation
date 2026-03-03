@@ -62,7 +62,6 @@
 {{-- Top --}}
 <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;">
     <div>
-        <p style="font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--textlt);margin-bottom:.3rem;">Fase 4</p>
         <h2 style="font-family:'Fraunces',serif;font-size:1.6rem;font-weight:700;color:var(--soil);letter-spacing:-.02em;">Rencana Tata Tanam</h2>
         @if($mt)
         <p style="font-size:.82rem;color:var(--textlt);margin-top:.2rem;">

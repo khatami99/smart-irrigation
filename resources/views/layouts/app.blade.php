@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Smart Irrigation')</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=Karla:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -160,6 +161,13 @@
                 <a href="{{ route('rtt.index') }}"
                 class="nav-item {{ request()->routeIs('rtt.*') ? 'active' : '' }}">
                     <span style="font-size:1rem;margin-right:.65rem;">🗓️</span> RTT
+                </a>
+                @endcan
+
+                @can('view peta')
+                <a href="{{ route('peta.index') }}"
+                class="nav-item {{ request()->routeIs('peta.*') ? 'active' : '' }}">
+                    <span style="font-size:1rem;margin-right:.65rem;">🗺️</span> Peta Irigasi
                 </a>
                 @endcan
 

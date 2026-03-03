@@ -10,28 +10,57 @@ class IrrigationController extends Controller
 {
     public function index()
     {
+        // ── Prediksi AI ─────────────────────────────────────────
         $pythonPath = base_path('predict.py');
-        $output = shell_exec("python $pythonPath");
-
+        $output     = shell_exec("python $pythonPath");
         preg_match('/Prediksi Kebutuhan Air Besok: ([\d.]+)/', $output, $matches);
-        $forecast = $matches[1] ?? '0.0';
+        $forecast = (float) ($matches[1] ?? 0.0);
 
-        if ($forecast > 50) {
-            $recommendation = ['status' => 'Kritis', 'color' => 'text-red-500', 'msg' => 'Tanah diprediksi sangat kering. Segera siapkan volume air ekstra!'];
-        } elseif ($forecast >= 20) {
-            $recommendation = ['status' => 'Normal', 'color' => 'text-blue-400', 'msg' => 'Kebutuhan air stabil. Lakukan penyiraman sesuai jadwal rutin.'];
+        // ── Threshold adaptif berdasarkan distribusi data historis ──
+        $stats  = IrrigationData::selectRaw('AVG(kebutuhan_air) as avg, STDDEV(kebutuhan_air) as stddev')->first();
+        $avg    = (float) ($stats->avg    ?? 5);
+        $stddev = (float) ($stats->stddev ?? 1.5);
+
+        $thresholdTinggi = $avg + ($stddev * 0.5);
+        $thresholdRendah = $avg - ($stddev * 0.5);
+
+        if ($forecast > $thresholdTinggi) {
+            $recommendation = [
+                'status' => 'Tinggi',
+                'color'  => 'text-red-500',
+                'msg'    => 'Kebutuhan air di atas rata-rata historis. Pantau debit saluran lebih ketat.',
+            ];
+        } elseif ($forecast >= $thresholdRendah) {
+            $recommendation = [
+                'status' => 'Normal',
+                'color'  => 'text-blue-400',
+                'msg'    => 'Kebutuhan air dalam rentang normal. Jalankan jadwal irigasi seperti biasa.',
+            ];
         } else {
-            $recommendation = ['status' => 'Hemat', 'color' => 'text-emerald-400', 'msg' => 'Kebutuhan air rendah. Anda bisa menghemat penggunaan pompa.'];
+            $recommendation = [
+                'status' => 'Rendah',
+                'color'  => 'text-emerald-400',
+                'msg'    => 'Kebutuhan air di bawah rata-rata. Efisiensi penggunaan pompa bisa ditingkatkan.',
+            ];
         }
 
+        // ── Data chart 30 hari terakhir ──────────────────────────
         $allData   = IrrigationData::orderBy('tanggal', 'asc')
                         ->where('tanggal', '>=', now()->subDays(30)->format('Y-m-d'))
                         ->get();
         $labels    = $allData->pluck('tanggal');
         $kebutuhan = $allData->pluck('kebutuhan_air');
+
+        // ── Rerata kebutuhan (30 hari) ───────────────────────────
+        $rerata = round($allData->avg('kebutuhan_air'), 2);
+
         $tableData = IrrigationData::orderBy('tanggal', 'desc')->paginate(10);
 
-        return view('irrigation.index', compact('labels', 'kebutuhan', 'forecast', 'recommendation', 'tableData'));
+        return view('irrigation.index', compact(
+            'labels', 'kebutuhan', 'forecast',
+            'recommendation', 'tableData', 'rerata',
+            'avg', 'thresholdRendah', 'thresholdTinggi'
+        ));
     }
 
     public function dataIklim()

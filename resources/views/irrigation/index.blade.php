@@ -25,13 +25,13 @@
         <h2 style="font-family:'Fraunces',serif;font-size:1.6rem;font-weight:700;color:var(--soil);letter-spacing:-.02em;">Ringkasan Irigasi</h2>
         <p style="font-size:.82rem;color:var(--textlt);font-weight:300;margin-top:.2rem;">Data diolah dengan algoritma Linear Regression · Metode FAO-56</p>
     </div>
-    @can('create data-iklim')
+    {{-- @can('create data-iklim')
         <a href="{{ route('irrigation.create') }}"
         style="background:var(--soil);color:var(--straw);padding:.65rem 1.4rem;border-radius:8px;font-size:.85rem;font-weight:600;text-decoration:none;transition:background .2s;display:inline-flex;align-items:center;gap:.4rem;"
         onmouseover="this.style.background='var(--soil2)'" onmouseout="this.style.background='var(--soil)'">
             + Tambah Data
         </a>
-    @endcan
+    @endcan --}}
 </div>
 
 {{-- Stat Cards --}}
@@ -50,11 +50,28 @@
     {{-- Status --}}
     <div class="card" style="padding:1.5rem;">
         <p style="font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--textlt);margin-bottom:.75rem;">Status Sistem</p>
+
         <div style="display:flex;align-items:center;gap:.5rem;">
-            <div style="width:8px;height:8px;border-radius:50%;background:var(--leaf);animation:pulse 2s infinite;flex-shrink:0;"></div>
-            <span style="font-family:'Fraunces',serif;font-size:1.6rem;font-weight:700;color:var(--leaf);">Optimal</span>
+            <div style="width:8px;height:8px;border-radius:50%;
+                background:{{ $recommendation['status'] === 'Tinggi' ? '#b94a3c' : ($recommendation['status'] === 'Normal' ? '#4a7c6f' : '#5a7a47') }};
+                animation:pulse 2s infinite;flex-shrink:0;"></div>
+            <span style="font-family:'Fraunces',serif;font-size:1.6rem;font-weight:700;
+                color:{{ $recommendation['status'] === 'Tinggi' ? '#b94a3c' : ($recommendation['status'] === 'Normal' ? '#4a7c6f' : '#5a7a47') }};">
+                {{ $recommendation['status'] }}
+            </span>
         </div>
-        <div style="margin-top:.75rem;"><span class="badge-leaf">Sistem aktif</span></div>
+
+        <p style="font-size:.78rem;color:var(--textlt);margin-top:.5rem;line-height:1.5;">
+            {{ $recommendation['msg'] }}
+        </p>
+
+        <div style="margin-top:.75rem;">
+            <span class="badge-leaf">Sistem aktif</span>
+        </div>
+
+        <p style="font-size:.65rem;color:var(--textlt);margin-top:.6rem;line-height:1.4;opacity:.7;">
+            * Berdasarkan distribusi data historis. Kalibrasi dengan data lapangan disarankan.
+        </p>
     </div>
 
     {{-- AI Prediction --}}

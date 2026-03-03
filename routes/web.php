@@ -9,6 +9,7 @@ use App\Http\Controllers\BlangkoOpController;
 use App\Http\Controllers\GrafikController;
 use App\Http\Controllers\RttController;
 use App\Http\Controllers\LaporanController;
+use App\Http\Controllers\PetaController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -44,4 +45,25 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/laporan/excel/blangko-op',[LaporanController::class, 'excelBlangkoOp'])->name('laporan.excel.blangko-op');
     Route::get('/laporan/excel/rtt',       [LaporanController::class, 'excelRtt'])->name('laporan.excel.rtt');
     Route::get('/laporan/excel/rekap',     [LaporanController::class, 'excelRekap'])->name('laporan.excel.rekap');
+
+    Route::middleware('permission:view peta')->group(function () {
+        Route::get('/peta', [PetaController::class, 'index'])->name('peta.index');
+        Route::get('/peta/geojson', [PetaController::class, 'getGeoJson'])->name('peta.geojson');
+    });
+
+    Route::middleware('permission:create peta')->group(function () {
+        Route::post('/peta/layer', [PetaController::class, 'storeLayer'])->name('peta.layer.store');
+        Route::post('/peta/feature', [PetaController::class, 'storeFeature'])->name('peta.feature.store');
+        Route::post('/peta/import', [PetaController::class, 'importGeoJson'])->name('peta.import');
+    });
+
+    Route::middleware('permission:edit peta')->group(function () {
+        Route::put('/peta/layer/{layer}', [PetaController::class, 'updateLayer'])->name('peta.layer.update');
+        Route::put('/peta/feature/{feature}', [PetaController::class, 'updateFeature'])->name('peta.feature.update');
+    });
+
+    Route::middleware('permission:delete peta')->group(function () {
+        Route::delete('/peta/layer/{layer}', [PetaController::class, 'destroyLayer'])->name('peta.layer.destroy');
+        Route::delete('/peta/feature/{feature}', [PetaController::class, 'destroyFeature'])->name('peta.feature.destroy');
+    });
 });
