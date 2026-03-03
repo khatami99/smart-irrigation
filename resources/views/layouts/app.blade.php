@@ -162,6 +162,11 @@
                     <span style="font-size:1rem;margin-right:.65rem;">🗓️</span> RTT
                 </a>
                 @endcan
+
+                <a href="{{ route('laporan.index') }}"
+                class="nav-item {{ request()->routeIs('laporan.*') ? 'active' : '' }}">
+                    <span style="font-size:1rem;margin-right:.65rem;">📑</span> Laporan
+                </a>
             </nav>
 
             {{-- User --}}
