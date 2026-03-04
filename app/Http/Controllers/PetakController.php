@@ -42,6 +42,8 @@ class PetakController extends BaseController
             'penanggung_jawab'  => 'nullable|string|max:100',
             'status'            => 'required|in:aktif,nonaktif',
             'keterangan'        => 'nullable|string',
+            'latitude'  => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
         ]);
 
         Petak::create($request->all());
@@ -64,6 +66,8 @@ class PetakController extends BaseController
             'penanggung_jawab'  => 'nullable|string|max:100',
             'status'            => 'required|in:aktif,nonaktif',
             'keterangan'        => 'nullable|string',
+            'latitude'  => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
         ]);
 
         $petak->update($request->all());

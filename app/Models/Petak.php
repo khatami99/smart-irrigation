@@ -32,4 +32,15 @@ class Petak extends Model
     {
         return number_format($this->luas_area, 2) . ' ha';
     }
+
+    public function mapFeature()
+    {
+        return $this->belongsTo(MapFeature::class);
+    }
+
+    // Cek apakah petak sudah punya polygon di peta
+    public function getHasPetaAttribute(): bool
+    {
+        return !is_null($this->map_feature_id);
+    }
 }

@@ -484,12 +484,15 @@
             <!-- Floating cards -->
             <div class="visual-card">
                 <div class="visual-card-label">Kebutuhan Air</div>
-                <div class="visual-card-val">4.2 <span style="font-size:.9rem;font-weight:300">mm</span></div>
-                <div class="visual-card-sub">hari ini · normal</div>
+                <div class="visual-card-val">
+                    {{ $latestKebutuhan ?? '—' }}
+                    <span style="font-size:.9rem;font-weight:300">mm</span>
+                </div>
+                <div class="visual-card-sub">hari ini · {{ $statusHari ?? 'belum ada data' }}</div>
             </div>
             <div class="visual-card-2">
                 <div class="label">ETo Hari Ini</div>
-                <div class="val">3.8 mm</div>
+                <div class="val">{{ $latestEto ?? '—' }} mm</div>
             </div>
         </div>
     </div>

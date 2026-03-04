@@ -12,7 +12,24 @@ use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\PetaController;
 
 Route::get('/', function () {
-    return view('welcome');
+    $latest = \App\Models\IrrigationData::orderBy('tanggal', 'desc')->first();
+
+    $latestKebutuhan = $latest ? round($latest->kebutuhan_air, 2) : null;
+    $latestEto       = $latest ? round($latest->eto, 2) : null;
+
+    $stats  = \App\Models\IrrigationData::selectRaw('AVG(kebutuhan_air) as avg, STDDEV(kebutuhan_air) as stddev')->first();
+    $avg    = (float) ($stats->avg ?? 5);
+    $stddev = (float) ($stats->stddev ?? 1.5);
+
+    if ($latestKebutuhan > $avg + ($stddev * 0.5)) {
+        $statusHari = 'tinggi';
+    } elseif ($latestKebutuhan >= $avg - ($stddev * 0.5)) {
+        $statusHari = 'normal';
+    } else {
+        $statusHari = 'rendah';
+    }
+
+    return view('welcome', compact('latestKebutuhan', 'latestEto', 'statusHari'));
 });
 
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');

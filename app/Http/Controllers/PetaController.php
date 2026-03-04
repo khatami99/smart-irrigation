@@ -1,25 +1,26 @@
 <?php
 namespace App\Http\Controllers;
 
-use App\Models\MapLayer;
 use App\Models\MapFeature;
+use App\Models\MapLayer;
 use App\Models\Petak;
+use App\Models\Saluran;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class PetaController extends Controller
 {
     // ── Halaman utama peta ──────────────────────────────────────
     public function index()
     {
-        $layers = MapLayer::with('features.petak')
+        $layers = MapLayer::with('features.layer', 'features.petak', 'features.saluran')
             ->where('is_active', true)
             ->orderBy('urutan')
             ->get();
 
-        $petaks  = Petak::orderBy('kode_petak')->get();
-        $allLayers = MapLayer::orderBy('urutan')->get(); // untuk panel manage
+        $petaks    = Petak::orderBy('kode_petak')->get();
+        $allLayers = MapLayer::orderBy('urutan')->get();
 
-        // Semua fitur sebagai GeoJSON untuk Leaflet
         $geoJsonAll = [
             'type'     => 'FeatureCollection',
             'features' => $layers->flatMap(fn($l) => $l->features->map(fn($f) => $f->toGeoJsonFeature()))->values(),
@@ -31,7 +32,7 @@ class PetaController extends Controller
     // ── API: ambil semua features sebagai GeoJSON ───────────────
     public function getGeoJson()
     {
-        $layers = MapLayer::with('features.petak')
+        $layers = MapLayer::with('features.petak', 'features.saluran', 'features.layer')
             ->where('is_active', true)
             ->orderBy('urutan')
             ->get();
@@ -50,13 +51,13 @@ class PetaController extends Controller
         $data = $request->validate([
             'nama'       => 'required|string|max:100',
             'tipe'       => 'required|in:polygon,polyline',
+            'kategori'   => 'required|in:daerah_irigasi,petak,saluran',
             'warna'      => 'required|string|size:7',
             'opacity'    => 'nullable|numeric|min:0|max:1',
             'keterangan' => 'nullable|string',
         ]);
 
         $layer = MapLayer::create($data);
-
         return response()->json(['success' => true, 'layer' => $layer]);
     }
 
@@ -64,6 +65,7 @@ class PetaController extends Controller
     {
         $data = $request->validate([
             'nama'       => 'required|string|max:100',
+            'kategori'   => 'required|in:daerah_irigasi,petak,saluran',
             'warna'      => 'required|string|size:7',
             'opacity'    => 'nullable|numeric|min:0|max:1',
             'keterangan' => 'nullable|string',
@@ -71,7 +73,6 @@ class PetaController extends Controller
         ]);
 
         $layer->update($data);
-
         return response()->json(['success' => true, 'layer' => $layer]);
     }
 
@@ -84,19 +85,79 @@ class PetaController extends Controller
     // ── Feature CRUD ────────────────────────────────────────────
     public function storeFeature(Request $request)
     {
+        $layer = MapLayer::findOrFail($request->map_layer_id);
+
         $data = $request->validate([
-            'map_layer_id' => 'required|exists:map_layers,id',
-            'petak_id'     => 'nullable|exists:petaks,id',
-            'nama'         => 'required|string|max:150',
-            'deskripsi'    => 'nullable|string',
-            'luas_manual'  => 'nullable|numeric|min:0',
-            'geojson'      => 'required|array',
-            'warna'        => 'nullable|string|size:7',
+            'map_layer_id'        => 'required|exists:map_layers,id',
+            'nama'                => 'required|string|max:150',
+            'deskripsi'           => 'nullable|string',
+            'luas_manual'         => 'nullable|numeric|min:0',
+            'geojson'             => 'required|array',
+            'warna'               => 'nullable|string|size:7',
+            'kode_petak'          => 'nullable|string|max:20',
+            'pintu_air'           => 'nullable|string|max:100',
+            'penanggung_jawab'    => 'nullable|string|max:100',
+            'status_petak'        => 'nullable|in:aktif,nonaktif',
+            'keterangan_petak'    => 'nullable|string',
+            'tipe_saluran'        => 'nullable|in:primer,sekunder,tersier',
+            'panjang_km'          => 'nullable|numeric|min:0',
+            'kondisi_saluran'     => 'nullable|in:baik,sedang,rusak',
+            'pj_saluran'          => 'nullable|string|max:100',
+            'keterangan_saluran'  => 'nullable|string',
         ]);
 
-        $feature = MapFeature::create($data);
-        // $feature->load('layer', 'petak');
-        $feature = MapFeature::with('layer', 'petak')->find($feature->id);
+        $feature = MapFeature::create([
+            'map_layer_id' => $data['map_layer_id'],
+            'nama'         => $data['nama'],
+            'deskripsi'    => $data['deskripsi'] ?? null,
+            'luas_manual'  => $data['luas_manual'] ?? null,
+            'geojson'      => $data['geojson'],
+            'warna'        => $data['warna'] ?? null,
+        ]);
+
+        // ── Auto-sync Petak ───────────────────────────────────
+        if ($layer->kategori === 'petak' && $request->filled('kode_petak')) {
+            $petak = Petak::where('kode_petak', $request->kode_petak)->first();
+
+            if ($petak) {
+                $petak->update([
+                    'nama_petak'       => $data['nama'],
+                    'luas_area'        => $data['luas_manual'] ?? $petak->luas_area,
+                    'pintu_air'        => $data['pintu_air'] ?? $petak->pintu_air,
+                    'penanggung_jawab' => $data['penanggung_jawab'] ?? $petak->penanggung_jawab,
+                    'status'           => $data['status_petak'] ?? $petak->status,
+                    'keterangan'       => $data['keterangan_petak'] ?? $petak->keterangan,
+                    'map_feature_id'   => $feature->id,
+                ]);
+            } else {
+                Petak::create([
+                    'kode_petak'       => $data['kode_petak'],
+                    'nama_petak'       => $data['nama'],
+                    'luas_area'        => $data['luas_manual'] ?? 0,
+                    'lokasi_wilayah'   => '-',
+                    'pintu_air'        => $data['pintu_air'] ?? null,
+                    'penanggung_jawab' => $data['penanggung_jawab'] ?? null,
+                    'status'           => $data['status_petak'] ?? 'aktif',
+                    'keterangan'       => $data['keterangan_petak'] ?? null,
+                    'map_feature_id'   => $feature->id,
+                ]);
+            }
+        }
+
+        // ── Auto-sync Saluran ─────────────────────────────────
+        if ($layer->kategori === 'saluran' && $request->filled('tipe_saluran')) {
+            Saluran::create([
+                'map_feature_id'   => $feature->id,
+                'nama'             => $data['nama'],
+                'tipe'             => $data['tipe_saluran'] ?? 'sekunder',
+                'panjang_km'       => $data['panjang_km'] ?? null,
+                'kondisi'          => $data['kondisi_saluran'] ?? 'baik',
+                'penanggung_jawab' => $data['pj_saluran'] ?? null,
+                'keterangan'       => $data['keterangan_saluran'] ?? null,
+            ]);
+        }
+
+        $feature = MapFeature::with('layer', 'petak', 'saluran')->find($feature->id);
 
         return response()->json([
             'success' => true,
@@ -106,16 +167,68 @@ class PetaController extends Controller
 
     public function updateFeature(Request $request, MapFeature $feature)
     {
+        $layer = $feature->layer;
+
         $data = $request->validate([
-            'petak_id'    => 'nullable|exists:petaks,id',
-            'nama'        => 'required|string|max:150',
-            'deskripsi'   => 'nullable|string',
-            'luas_manual' => 'nullable|numeric|min:0',
-            'geojson'     => 'nullable|array',
-            'warna'       => 'nullable|string|size:7',
+            'nama'         => 'required|string|max:150',
+            'deskripsi'    => 'nullable|string',
+            'luas_manual'  => 'nullable|numeric|min:0',
+            'geojson'      => 'nullable|array',
+            'warna'        => 'nullable|string|size:7',
+
+            // Field petak
+            'kode_petak'       => 'nullable|string|max:20',
+            'pintu_air'        => 'nullable|string|max:100',
+            'penanggung_jawab' => 'nullable|string|max:100',
+            'status_petak'     => 'nullable|in:aktif,nonaktif',
+            'keterangan_petak' => 'nullable|string',
+
+            // Field saluran
+            'tipe_saluran'       => 'nullable|in:primer,sekunder,tersier',
+            'panjang_km'         => 'nullable|numeric|min:0',
+            'kondisi_saluran'    => 'nullable|in:baik,sedang,rusak',
+            'pj_saluran'         => 'nullable|string|max:100',
+            'keterangan_saluran' => 'nullable|string',
         ]);
 
-        $feature->update($data);
+        // Update feature
+        $feature->update([
+            'nama'        => $data['nama'],
+            'deskripsi'   => $data['deskripsi'] ?? null,
+            'luas_manual' => $data['luas_manual'] ?? null,
+            'geojson'     => $data['geojson'] ?? $feature->geojson,
+            'warna'       => $data['warna'] ?? null,
+        ]);
+
+        // ── Auto-sync update ──────────────────────────────────
+        if ($layer->kategori === 'petak') {
+            $petak = Petak::where('map_feature_id', $feature->id)->first();
+            if ($petak) {
+                $petak->update([
+                    'nama_petak'       => $data['nama'],
+                    'luas_area'        => $data['luas_manual'] ?? $petak->luas_area,
+                    'pintu_air'        => $data['pintu_air'] ?? $petak->pintu_air,
+                    'penanggung_jawab' => $data['penanggung_jawab'] ?? $petak->penanggung_jawab,
+                    'status'           => $data['status_petak'] ?? $petak->status,
+                    'keterangan'       => $data['keterangan_petak'] ?? $petak->keterangan,
+                ]);
+            }
+        }
+
+        if ($layer->kategori === 'saluran') {
+            $saluran = Saluran::where('map_feature_id', $feature->id)->first();
+            if ($saluran) {
+                $saluran->update([
+                    'nama'             => $data['nama'],
+                    'tipe'             => $data['tipe_saluran'] ?? $saluran->tipe,
+                    'panjang_km'       => $data['panjang_km'] ?? $saluran->panjang_km,
+                    'kondisi'          => $data['kondisi_saluran'] ?? $saluran->kondisi,
+                    'penanggung_jawab' => $data['pj_saluran'] ?? $saluran->penanggung_jawab,
+                    'keterangan'       => $data['keterangan_saluran'] ?? $saluran->keterangan,
+                ]);
+            }
+        }
+
         $feature->load('layer', 'petak');
 
         return response()->json([
@@ -126,6 +239,10 @@ class PetaController extends Controller
 
     public function destroyFeature(MapFeature $feature)
     {
+        // Soft delete petak/saluran terkait juga
+        Petak::where('map_feature_id', $feature->id)->update(['map_feature_id' => null]);
+        Saluran::where('map_feature_id', $feature->id)->delete();
+
         $feature->delete();
         return response()->json(['success' => true]);
     }

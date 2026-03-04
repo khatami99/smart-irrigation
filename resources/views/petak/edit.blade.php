@@ -96,6 +96,38 @@
                 </div>
             </div>
 
+            <div style="margin-bottom:1.5rem;">
+                <p class="section-label">🌐 Koordinat Lokasi <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:.7rem;">(opsional — klik peta atau isi manual)</span></p>
+
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:.75rem;">
+                    <div>
+                        <label class="form-label">Latitude</label>
+                        <input type="number" name="latitude" id="input-lat"
+                            value="{{ old('latitude', $petak->latitude) }}"
+                            step="0.0000001" placeholder="cth: -2.3456789"
+                            class="form-input">
+                    </div>
+                    <div>
+                        <label class="form-label">Longitude</label>
+                        <input type="number" name="longitude" id="input-lng"
+                            value="{{ old('longitude', $petak->longitude) }}"
+                            step="0.0000001" placeholder="cth: 114.1234567"
+                            class="form-input">
+                    </div>
+                </div>
+
+                <div style="border:1.5px solid var(--border);border-radius:10px;overflow:hidden;">
+                    <div style="padding:.6rem 1rem;background:rgba(139,94,60,.04);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+                        <span style="font-size:.75rem;color:var(--textlt);">💡 Klik pada peta untuk mengubah titik lokasi petak</span>
+                        <button type="button" onclick="resetMarker()"
+                            style="font-size:.72rem;color:var(--textlt);background:none;border:none;cursor:pointer;padding:0;">
+                            ✖ Reset
+                        </button>
+                    </div>
+                    <div id="map-picker" style="height:260px;"></div>
+                </div>
+            </div>
+
             <div style="margin-bottom:1.75rem;">
                 <p class="section-label">⚙️ Status & Keterangan</p>
                 <div style="display:grid;grid-template-columns:1fr 2fr;gap:1rem;">
@@ -122,4 +154,58 @@
         </form>
     </div>
 </div>
+
+@push('scripts')
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const initLat = {{ old('latitude', $petak->latitude) ?: -2.2 }};
+const initLng = {{ old('longitude', $petak->longitude) ?: 114.0 }};
+const hasCoord = {{ ($petak->latitude && $petak->longitude) ? 'true' : 'false' }};
+
+const pickerMap = L.map('map-picker').setView([initLat, initLng], hasCoord ? 14 : 10);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap', maxZoom: 19
+}).addTo(pickerMap);
+
+const markerIcon = L.divIcon({
+    html: `<div style="width:18px;height:18px;background:var(--water,#4a7c6f);border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,.3);"></div>`,
+    iconSize: [18, 18], iconAnchor: [9, 9], className: ''
+});
+
+let marker = hasCoord ? L.marker([initLat, initLng], { icon: markerIcon }).addTo(pickerMap) : null;
+
+pickerMap.on('click', function(e) {
+    const { lat, lng } = e.latlng;
+    document.getElementById('input-lat').value = lat.toFixed(7);
+    document.getElementById('input-lng').value = lng.toFixed(7);
+
+    if (marker) marker.remove();
+    marker = L.marker([lat, lng], { icon: markerIcon })
+        .addTo(pickerMap)
+        .bindPopup(`<small>${lat.toFixed(5)}, ${lng.toFixed(5)}</small>`)
+        .openPopup();
+});
+
+// Sync input manual → update marker
+['input-lat', 'input-lng'].forEach(id => {
+    document.getElementById(id).addEventListener('change', function() {
+        const lat = parseFloat(document.getElementById('input-lat').value);
+        const lng = parseFloat(document.getElementById('input-lng').value);
+        if (!isNaN(lat) && !isNaN(lng)) {
+            if (marker) marker.remove();
+            marker = L.marker([lat, lng], { icon: markerIcon }).addTo(pickerMap);
+            pickerMap.setView([lat, lng], 14);
+        }
+    });
+});
+
+function resetMarker() {
+    if (marker) { marker.remove(); marker = null; }
+    document.getElementById('input-lat').value = '';
+    document.getElementById('input-lng').value = '';
+}
+</script>
+@endpush
+
 @endsection

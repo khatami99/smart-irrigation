@@ -9,7 +9,7 @@ class MapLayer extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'nama', 'tipe', 'warna', 'opacity',
+        'nama', 'tipe', 'kategori', 'warna', 'opacity',
         'keterangan', 'is_active', 'urutan'
     ];
 

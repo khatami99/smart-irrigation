@@ -19,17 +19,32 @@ class MapFeature extends Model
 
     public function layer()
     {
-        return $this->belongsTo(MapLayer::class);
+        return $this->belongsTo(MapLayer::class, 'map_layer_id');
     }
 
     public function petak()
     {
-        return $this->belongsTo(Petak::class);
+        return $this->hasOne(Petak::class, 'map_feature_id');
+    }
+
+    public function saluran()
+    {
+        return $this->hasOne(Saluran::class, 'map_feature_id');
+    }
+
+    // Deteksi apakah feature ini adalah petak atau saluran
+    public function getTipeDataAttribute(): string
+    {
+        if ($this->layer->tipe === 'polyline') return 'saluran';
+        return 'petak';
     }
 
     // Format sebagai GeoJSON Feature
     public function toGeoJsonFeature(): array
     {
+        $petak   = $this->petak;
+        $saluran = $this->saluran;
+
         return [
             'type'       => 'Feature',
             'id'         => $this->id,
@@ -43,8 +58,20 @@ class MapFeature extends Model
                 'layer_id'    => $this->map_layer_id,
                 'layer_nama'  => $this->layer?->nama,
                 'layer_tipe'  => $this->layer?->tipe,
-                'petak_kode'  => $this->petak?->kode_petak,
-                'petak_nama'  => $this->petak?->nama_petak,
+                'layer_kategori' => $this->layer?->kategori,
+
+                // Data petak
+                'petak_kode'     => $petak?->kode_petak,
+                'petak_nama'     => $petak?->nama_petak,
+                'petak_pintu_air'=> $petak?->pintu_air,
+                'petak_pj'       => $petak?->penanggung_jawab,
+                'petak_status'   => $petak?->status,
+
+                // Data saluran
+                'saluran_tipe'    => $saluran?->tipe,
+                'saluran_panjang' => $saluran?->panjang_km,
+                'saluran_kondisi' => $saluran?->kondisi,
+                'saluran_pj'      => $saluran?->penanggung_jawab,
             ],
         ];
     }

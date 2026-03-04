@@ -436,6 +436,14 @@
             </select>
         </div>
         <div class="modal-field">
+            <label class="modal-label">Kategori Data</label>
+            <select id="layer-kategori" class="modal-select">
+                <option value="daerah_irigasi">🏞️ Daerah Irigasi</option>
+                <option value="petak">🌾 Petak Sawah</option>
+                <option value="saluran">〰️ Saluran Irigasi</option>
+            </select>
+        </div>
+        <div class="modal-field">
             <label class="modal-label">Warna</label>
             <div style="display:flex;align-items:center;gap:.75rem;">
                 <input type="color" id="layer-warna" class="modal-input" value="#4a7c6f"
@@ -459,32 +467,92 @@
      MODAL: Simpan Feature
 ══════════════════════════════════════════════ --}}
 <div id="featureModal" class="modal-overlay">
-    <div class="modal-box">
+    <div class="modal-box" style="width:480px;">
         <div class="modal-title" id="featureModalTitle">📍 Simpan Area</div>
         <input type="hidden" id="edit-feature-id">
         <input type="hidden" id="feature-geojson">
         <input type="hidden" id="feature-layer-id">
+        <input type="hidden" id="feature-layer-tipe">
 
+        {{-- Field umum --}}
         <div class="modal-field">
-            <label class="modal-label">Nama Area / Daerah Irigasi</label>
-            <input type="text" id="feature-nama" class="modal-input" placeholder="cth: DI Rawa Adul">
+            <label class="modal-label">Nama <span style="color:#e88">*</span></label>
+            <input type="text" id="feature-nama" class="modal-input" placeholder="cth: DI Rawa Adul / Saluran Primer A">
         </div>
-        <div class="modal-field">
-            <label class="modal-label">Petak Sawah <span style="font-weight:400;color:#bbb">(opsional)</span></label>
-            <select id="feature-petak" class="modal-select">
-                <option value="">— Tidak terkait petak —</option>
-                @foreach($petaks as $p)
-                <option value="{{ $p->id }}">{{ $p->kode_petak }} — {{ $p->nama_petak }}</option>
-                @endforeach
-            </select>
+
+        {{-- Field khusus POLYGON (petak) --}}
+        <div id="fields-polygon">
+            <div style="background:rgba(74,124,111,.06);border:1.5px dashed rgba(74,124,111,.2);border-radius:10px;padding:.85rem;margin-bottom:.9rem;">
+                <p style="font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--water);margin:0 0 .75rem;">📐 Data Petak Sawah</p>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;">
+                    <div class="modal-field" style="margin:0;">
+                        <label class="modal-label">Kode Petak</label>
+                        <input type="text" id="feature-kode-petak" class="modal-input" placeholder="cth: P-04" style="text-transform:uppercase;">
+                    </div>
+                    <div class="modal-field" style="margin:0;">
+                        <label class="modal-label">Luas (ha)</label>
+                        <input type="number" id="feature-luas" class="modal-input" step="0.01" min="0" placeholder="0.00">
+                    </div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-top:.75rem;">
+                    <div class="modal-field" style="margin:0;">
+                        <label class="modal-label">Pintu Air</label>
+                        <input type="text" id="feature-pintu-air" class="modal-input" placeholder="cth: PA-01">
+                    </div>
+                    <div class="modal-field" style="margin:0;">
+                        <label class="modal-label">Penanggung Jawab</label>
+                        <input type="text" id="feature-pj" class="modal-input" placeholder="cth: Bapak Ahmad">
+                    </div>
+                </div>
+                <div style="margin-top:.75rem;">
+                    <label class="modal-label">Status Petak</label>
+                    <select id="feature-status-petak" class="modal-select">
+                        <option value="aktif">Aktif</option>
+                        <option value="nonaktif">Non-Aktif</option>
+                    </select>
+                </div>
+            </div>
         </div>
-        <div class="modal-field">
-            <label class="modal-label">Luas <span style="font-weight:400;color:#bbb">(ha, opsional)</span></label>
-            <input type="number" id="feature-luas" class="modal-input" step="0.01" min="0" placeholder="0.00">
+
+        {{-- Field khusus POLYLINE (saluran) --}}
+        <div id="fields-polyline" style="display:none;">
+            <div style="background:rgba(74,124,111,.06);border:1.5px dashed rgba(74,124,111,.2);border-radius:10px;padding:.85rem;margin-bottom:.9rem;">
+                <p style="font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--water);margin:0 0 .75rem;">〰️ Data Saluran Irigasi</p>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;">
+                    <div class="modal-field" style="margin:0;">
+                        <label class="modal-label">Tipe Saluran</label>
+                        <select id="feature-tipe-saluran" class="modal-select">
+                            <option value="primer">Primer</option>
+                            <option value="sekunder">Sekunder</option>
+                            <option value="tersier">Tersier</option>
+                        </select>
+                    </div>
+                    <div class="modal-field" style="margin:0;">
+                        <label class="modal-label">Panjang (km)</label>
+                        <input type="number" id="feature-panjang-km" class="modal-input" step="0.001" min="0" placeholder="0.000">
+                    </div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-top:.75rem;">
+                    <div class="modal-field" style="margin:0;">
+                        <label class="modal-label">Kondisi</label>
+                        <select id="feature-kondisi-saluran" class="modal-select">
+                            <option value="baik">Baik</option>
+                            <option value="sedang">Sedang</option>
+                            <option value="rusak">Rusak</option>
+                        </select>
+                    </div>
+                    <div class="modal-field" style="margin:0;">
+                        <label class="modal-label">Penanggung Jawab</label>
+                        <input type="text" id="feature-pj-saluran" class="modal-input" placeholder="cth: Bapak Samsul">
+                    </div>
+                </div>
+            </div>
         </div>
+
+        {{-- Keterangan (umum) --}}
         <div class="modal-field">
-            <label class="modal-label">Deskripsi <span style="font-weight:400;color:#bbb">(opsional)</span></label>
-            <textarea id="feature-deskripsi" class="modal-textarea" placeholder="Keterangan tambahan..."></textarea>
+            <label class="modal-label">Keterangan <span style="font-weight:400;color:#bbb">(opsional)</span></label>
+            <textarea id="feature-deskripsi" class="modal-textarea" placeholder="Catatan tambahan..."></textarea>
         </div>
 
         <div class="modal-footer">
@@ -568,7 +636,9 @@ function buildPopup(props) {
     const canEdit = @json(auth()->user()?->can('edit peta'));
     const canDel  = @json(auth()->user()?->can('delete peta'));
     const warna   = props.warna || '#4a7c6f';
-    const icon    = props.layer_tipe === 'polygon' ? '🏞️' : '〰️';
+    const kategori = props.layer_kategori || '';
+
+    const icon = kategori === 'petak' ? '🌾' : kategori === 'saluran' ? '〰️' : '🏞️';
 
     let html = `<div class="popup-wrap">
         <div class="popup-header">
@@ -579,20 +649,75 @@ function buildPopup(props) {
             </div>
         </div>`;
 
-    if (props.petak_kode) {
-        html += `<div class="popup-row">
-            <span class="popup-row-label">Petak</span>
-            <span class="popup-row-val">${props.petak_kode} — ${props.petak_nama}</span>
-        </div>`;
+    // ── Info Daerah Irigasi ──
+    if (kategori === 'daerah_irigasi' || kategori === '') {
+        if (props.luas_manual) html += `
+            <div class="popup-row">
+                <span class="popup-row-label">Luas</span>
+                <span class="popup-row-val">${parseFloat(props.luas_manual).toLocaleString('id-ID')} ha</span>
+            </div>`;
+        if (props.deskripsi) html += `<div class="popup-desc">${props.deskripsi}</div>`;
     }
-    if (props.luas_manual) {
-        html += `<div class="popup-row">
-            <span class="popup-row-label">Luas</span>
-            <span class="popup-row-val">${parseFloat(props.luas_manual).toLocaleString('id-ID')} ha</span>
-        </div>`;
+
+    // ── Info Petak Sawah ──
+    if (kategori === 'petak') {
+        if (props.petak_kode) html += `
+            <div class="popup-row">
+                <span class="popup-row-label">Kode</span>
+                <span class="popup-row-val">${props.petak_kode}</span>
+            </div>`;
+        if (props.luas_manual) html += `
+            <div class="popup-row">
+                <span class="popup-row-label">Luas</span>
+                <span class="popup-row-val">${parseFloat(props.luas_manual).toLocaleString('id-ID')} ha</span>
+            </div>`;
+        if (props.petak_pintu_air) html += `
+            <div class="popup-row">
+                <span class="popup-row-label">Pintu Air</span>
+                <span class="popup-row-val">${props.petak_pintu_air}</span>
+            </div>`;
+        if (props.petak_pj) html += `
+            <div class="popup-row">
+                <span class="popup-row-label">Penanggungjawab</span>
+                <span class="popup-row-val">${props.petak_pj}</span>
+            </div>`;
+        if (props.petak_status) {
+            const statusColor = props.petak_status === 'aktif' ? '#4a7c6f' : '#b94a3c';
+            html += `
+            <div class="popup-row">
+                <span class="popup-row-label">Status</span>
+                <span class="popup-row-val" style="color:${statusColor};text-transform:capitalize;">${props.petak_status}</span>
+            </div>`;
+        }
+        if (props.deskripsi) html += `<div class="popup-desc">${props.deskripsi}</div>`;
     }
-    if (props.deskripsi) {
-        html += `<div class="popup-desc">${props.deskripsi}</div>`;
+
+    // ── Info Saluran ──
+    if (kategori === 'saluran') {
+        if (props.saluran_tipe) html += `
+            <div class="popup-row">
+                <span class="popup-row-label">Tipe</span>
+                <span class="popup-row-val" style="text-transform:capitalize;">${props.saluran_tipe}</span>
+            </div>`;
+        if (props.saluran_panjang) html += `
+            <div class="popup-row">
+                <span class="popup-row-label">Panjang</span>
+                <span class="popup-row-val">${props.saluran_panjang} km</span>
+            </div>`;
+        if (props.saluran_kondisi) {
+            const kondisiColor = props.saluran_kondisi === 'baik' ? '#4a7c6f' : props.saluran_kondisi === 'sedang' ? '#c4895a' : '#b94a3c';
+            html += `
+            <div class="popup-row">
+                <span class="popup-row-label">Kondisi</span>
+                <span class="popup-row-val" style="color:${kondisiColor};text-transform:capitalize;">${props.saluran_kondisi}</span>
+            </div>`;
+        }
+        if (props.saluran_pj) html += `
+            <div class="popup-row">
+                <span class="popup-row-label">Penanggungjawab</span>
+                <span class="popup-row-val">${props.saluran_pj}</span>
+            </div>`;
+        if (props.deskripsi) html += `<div class="popup-desc">${props.deskripsi}</div>`;
     }
 
     if (canEdit || canDel) {
@@ -699,14 +824,36 @@ function cancelDraw() {
 map.on(L.Draw.Event.CREATED, function(e) {
     drawnItems.clearLayers();
     drawnItems.addLayer(e.layer);
-    document.getElementById('feature-layer-id').value = activeDrawLayerId;
-    document.getElementById('feature-geojson').value  = JSON.stringify(e.layer.toGeoJSON().geometry);
-    document.getElementById('featureModalTitle').textContent = '📍 Simpan Area';
-    document.getElementById('edit-feature-id').value  = '';
-    document.getElementById('feature-nama').value     = '';
-    document.getElementById('feature-petak').value    = '';
-    document.getElementById('feature-luas').value     = '';
-    document.getElementById('feature-deskripsi').value = '';
+
+    const sel       = document.getElementById('draw-layer-select');
+    const tipe      = sel.options[sel.selectedIndex]?.dataset.tipe || 'polygon';
+    const namaLayer = sel.options[sel.selectedIndex]?.text.toLowerCase() || '';
+    const isPetak   = tipe === 'polygon' && namaLayer.includes('petak');
+    const isSaluran = tipe === 'polyline';
+
+    document.getElementById('feature-layer-id').value    = activeDrawLayerId;
+    document.getElementById('feature-layer-tipe').value = isPetak ? 'petak' : (isSaluran ? 'polyline' : 'polygon');
+    document.getElementById('feature-geojson').value     = JSON.stringify(e.layer.toGeoJSON().geometry);
+    document.getElementById('featureModalTitle').textContent = tipe === 'polyline' ? '〰️ Simpan Saluran' : '📍 Simpan Area / Petak';
+    document.getElementById('edit-feature-id').value     = '';
+    document.getElementById('feature-nama').value        = '';
+    document.getElementById('feature-luas').value        = '';
+    document.getElementById('feature-deskripsi').value   = '';
+    document.getElementById('feature-kode-petak').value  = '';
+    document.getElementById('feature-pintu-air').value   = '';
+    document.getElementById('feature-pj').value          = '';
+    document.getElementById('feature-panjang-km').value  = '';
+
+    // Toggle field polygon/polyline
+    document.getElementById('fields-polygon').style.display  = isPetak   ? 'block' : 'none';
+    document.getElementById('fields-polyline').style.display = isSaluran ? 'block' : 'none';
+
+    // Judul modal
+    document.getElementById('featureModalTitle').textContent =
+        isPetak   ? '📍 Simpan Petak Sawah' :
+        isSaluran ? '〰️ Simpan Saluran Irigasi' :
+                    '🏞️ Simpan Daerah Irigasi';
+
     openModal('featureModal');
 });
 
@@ -766,6 +913,7 @@ function saveLayer() {
     const payload = {
         nama:       document.getElementById('layer-nama').value.trim(),
         tipe:       document.getElementById('layer-tipe').value,
+        kategori:   document.getElementById('layer-kategori').value,
         warna:      document.getElementById('layer-warna').value,
         keterangan: document.getElementById('layer-keterangan').value,
     };
@@ -804,25 +952,39 @@ function saveFeature() {
     const url    = isEdit ? `/peta/feature/${id}` : '/peta/feature';
     const method = isEdit ? 'PUT' : 'POST';
     const nama   = document.getElementById('feature-nama').value.trim();
+    const tipe   = document.getElementById('feature-layer-tipe').value;
 
-    if (!nama) { showToast('⚠️ Nama area wajib diisi!', 'warn'); return; }
+    if (!nama) { showToast('⚠️ Nama wajib diisi!', 'warn'); return; }
 
     const payload = {
         map_layer_id: document.getElementById('feature-layer-id').value,
         nama,
-        petak_id:    document.getElementById('feature-petak').value  || null,
-        luas_manual: document.getElementById('feature-luas').value   || null,
-        deskripsi:   document.getElementById('feature-deskripsi').value,
-        geojson:     JSON.parse(document.getElementById('feature-geojson').value),
+        deskripsi:    document.getElementById('feature-deskripsi').value || null,
+        geojson:      JSON.parse(document.getElementById('feature-geojson').value),
     };
+
+    if (tipe === 'petak') {
+        payload.luas_manual       = document.getElementById('feature-luas').value || null;
+        payload.kode_petak        = document.getElementById('feature-kode-petak').value || null;
+        payload.pintu_air         = document.getElementById('feature-pintu-air').value || null;
+        payload.penanggung_jawab  = document.getElementById('feature-pj').value || null;
+        payload.status_petak      = document.getElementById('feature-status-petak').value;
+        payload.keterangan_petak  = document.getElementById('feature-deskripsi').value || null;
+    } else if (tipe === 'polyline') {
+        payload.tipe_saluran      = document.getElementById('feature-tipe-saluran').value;
+        payload.panjang_km        = document.getElementById('feature-panjang-km').value || null;
+        payload.kondisi_saluran   = document.getElementById('feature-kondisi-saluran').value;
+        payload.pj_saluran        = document.getElementById('feature-pj-saluran').value || null;
+        payload.keterangan_saluran = document.getElementById('feature-deskripsi').value || null;
+    }
 
     fetchJson(url, method, payload).then(r => {
         if (r.success) {
             closeFeatureModal();
-            showToast('✅ Area berhasil disimpan!');
+            showToast('✅ Berhasil disimpan!');
             reloadFeatures();
         } else {
-            showToast('❌ Gagal menyimpan: ' + (r.message || ''), 'error');
+            showToast('❌ Gagal: ' + (r.message || ''), 'error');
         }
     });
 }
@@ -1036,6 +1198,19 @@ function fetchJson(url, method, data) {
     };
     if (method !== 'GET') opts.body = JSON.stringify(data);
     return fetch(url, opts).then(r => r.json());
+}
+
+// ══════════════════════════════════════════════════════════════
+// biar kalau pilih polyline, kategori otomatis ke saluran:
+// ══════════════════════════════════════════════════════════════
+function syncKategori() {
+    const tipe = document.getElementById('layer-tipe').value;
+    const kategoriSel = document.getElementById('layer-kategori');
+    if (tipe === 'polyline') {
+        kategoriSel.value = 'saluran';
+    } else if (kategoriSel.value === 'saluran') {
+        kategoriSel.value = 'daerah_irigasi';
+    }
 }
 </script>
 @endpush

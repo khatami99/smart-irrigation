@@ -124,12 +124,27 @@
             <p style="font-size:.72rem;color:var(--textlt);margin-top:.2rem;">30 hari terakhir · Lihat grafik lengkap untuk analisis lebih detail</p>
         </div>
         <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;">
+            {{-- Dropdown Musim Tanam --}}
+            <select id="dash-mt-select" onchange="gantiMusimTanam(this.value)"
+                style="padding:.3rem .7rem;border-radius:8px;border:1.5px solid var(--border);
+                    font-family:'Karla',sans-serif;font-size:.78rem;color:var(--soil);
+                    background:var(--cream2);outline:none;cursor:pointer;max-width:180px;">
+                <option value="">— Semua Data —</option>
+                @foreach($musimTanams as $mt)
+                <option value="{{ $mt->id }}" {{ $mt->id == ($mtAktif?->id) ? 'selected' : '' }}>
+                    {{ $mt->nama_mt }}
+                    @if($mt->status === 'berjalan') 🟢 @endif
+                </option>
+                @endforeach
+            </select>
+
+            {{-- Toggle Mode --}}
             <div style="display:flex;gap:.25rem;background:var(--cream2);border:1px solid var(--border);border-radius:8px;padding:.2rem;">
-                <button onclick="gantiModeDashboard('harian', this)"  class="dash-mode-btn"
+                <button onclick="gantiModeDashboard('harian', this)" class="dash-mode-btn"
                     style="padding:.3rem .7rem;border-radius:6px;border:none;font-size:.75rem;font-weight:600;cursor:pointer;font-family:'Karla',sans-serif;background:var(--soil);color:var(--straw);">
                     Harian
                 </button>
-                <button onclick="gantiModeDashboard('dekade', this)"  class="dash-mode-btn"
+                <button onclick="gantiModeDashboard('dekade', this)" class="dash-mode-btn"
                     style="padding:.3rem .7rem;border-radius:6px;border:none;font-size:.75rem;font-weight:600;cursor:pointer;font-family:'Karla',sans-serif;background:transparent;color:var(--textlt);">
                     Dekade
                 </button>
@@ -138,8 +153,9 @@
                     Bulan
                 </button>
             </div>
+
             <a href="{{ route('grafik.index') }}"
-               style="font-size:.75rem;color:var(--water);text-decoration:none;font-weight:600;">
+            style="font-size:.75rem;color:var(--water);text-decoration:none;font-weight:600;">
                 Lihat lengkap →
             </a>
         </div>
@@ -160,10 +176,14 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 let dashChart;
+let activeMtId = '{{ $mtAktif?->id ?? '' }}';
+let activeMode = 'harian';
 
 function initDashChart(labels, data) {
     if (dashChart) dashChart.destroy();
-    dashChart = new Chart(document.getElementById('chartKebutuhan'), {
+    const ctx = document.getElementById('chartKebutuhan');
+    if (!ctx) return;
+    dashChart = new Chart(ctx, {
         type: 'line',
         data: {
             labels: labels,
@@ -189,10 +209,23 @@ function initDashChart(labels, data) {
     });
 }
 
-// Load awal pakai data dari PHP
-initDashChart(@json($labels), @json($kebutuhan));
+function fetchDashChart(mode, mtId) {
+    let url = `{{ route('grafik.data') }}?mode=${mode}`;
+    if (mtId) url += `&musim_tanam_id=${mtId}`;
+
+    fetch(url)
+        .then(r => r.json())
+        .then(d => initDashChart(d.labels, d.kebutuhan));
+}
+
+function gantiMusimTanam(mtId) {
+    activeMtId = mtId;
+    fetchDashChart(activeMode, mtId);
+}
 
 function gantiModeDashboard(mode, btn) {
+    activeMode = mode;
+
     document.querySelectorAll('.dash-mode-btn').forEach(b => {
         b.style.background = 'transparent';
         b.style.color = 'var(--textlt)';
@@ -200,59 +233,54 @@ function gantiModeDashboard(mode, btn) {
     btn.style.background = 'var(--soil)';
     btn.style.color = 'var(--straw)';
 
-    // Harian: pakai data PHP yang sudah 30 hari terakhir
-    if (mode === 'harian') {
-        initDashChart(@json($labels), @json($kebutuhan));
-        return;
-    }
-
-    fetch(`{{ route('grafik.data') }}?mode=${mode}`)
-    .then(r => r.json())
-    .then(d => initDashChart(d.labels, d.kebutuhan));
+    fetchDashChart(mode, activeMtId);
 }
 
-    // AJAX Pagination
-    document.addEventListener('click', function(e) {
-        const link = e.target.closest('#table-wrapper a');
-        if (!link) return;
-        e.preventDefault();
-        const url = link.href;
-        startLoading();
+// Init awal
+if (activeMtId) {
+    fetchDashChart('harian', activeMtId);
+} else {
+    initDashChart(@json($labels), @json($kebutuhan));
+}
 
-        document.getElementById('table-wrapper').innerHTML = `
-            <div style="padding:1.25rem 1.5rem;border-bottom:1px solid rgba(139,94,60,.1);display:flex;justify-content:space-between;align-items:center;">
-                <div style="height:16px;width:180px;background:rgba(139,94,60,.1);border-radius:6px;animation:shimmer 1.5s ease-in-out infinite;"></div>
-                <div style="height:16px;width:80px;background:rgba(139,94,60,.08);border-radius:20px;animation:shimmer 1.5s .1s ease-in-out infinite;"></div>
-            </div>
-            <div style="padding:1rem 0;">
-                ${Array(8).fill('').map((_, i) => `
-                <div style="display:flex;gap:1rem;padding:.85rem 1.5rem;border-bottom:1px solid rgba(139,94,60,.06);">
-                    <div style="height:14px;width:90px;background:rgba(139,94,60,.09);border-radius:4px;animation:shimmer 1.5s ${i*.1}s ease-in-out infinite;"></div>
-                    <div style="height:14px;width:40px;background:rgba(139,94,60,.07);border-radius:4px;margin:0 auto;animation:shimmer 1.5s ${i*.1+.1}s ease-in-out infinite;"></div>
-                    <div style="height:14px;width:40px;background:rgba(139,94,60,.07);border-radius:4px;margin:0 auto;animation:shimmer 1.5s ${i*.1+.2}s ease-in-out infinite;"></div>
-                    <div style="height:14px;width:50px;background:rgba(139,94,60,.07);border-radius:4px;margin:0 auto;animation:shimmer 1.5s ${i*.1+.3}s ease-in-out infinite;"></div>
-                    <div style="height:14px;width:60px;background:rgba(139,94,60,.07);border-radius:4px;margin:0 auto;animation:shimmer 1.5s ${i*.1+.4}s ease-in-out infinite;"></div>
-                    <div style="height:14px;width:80px;background:rgba(139,94,60,.07);border-radius:4px;margin:0 auto;animation:shimmer 1.5s ${i*.1+.5}s ease-in-out infinite;"></div>
-                </div>`).join('')}
-            </div>
-            <style>
-                @keyframes shimmer {
-                    0%,100%{opacity:.5} 50%{opacity:1}
-                }
-            </style>
-        `;
+// AJAX Pagination
+document.addEventListener('click', function(e) {
+    const link = e.target.closest('#table-wrapper a');
+    if (!link) return;
+    e.preventDefault();
+    const url = link.href;
+    startLoading();
 
-        fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-        .then(r => r.text())
-        .then(html => {
-            const doc = new DOMParser().parseFromString(html, 'text/html');
-            const newTable = doc.querySelector('#table-wrapper');
-            if (newTable) {
-                document.getElementById('table-wrapper').innerHTML = newTable.innerHTML;
-                window.history.pushState({}, '', url);
-            }
-            finishLoading();
-        });
+    document.getElementById('table-wrapper').innerHTML = `
+        <div style="padding:1.25rem 1.5rem;border-bottom:1px solid rgba(139,94,60,.1);display:flex;justify-content:space-between;align-items:center;">
+            <div style="height:16px;width:180px;background:rgba(139,94,60,.1);border-radius:6px;animation:shimmer 1.5s ease-in-out infinite;"></div>
+            <div style="height:16px;width:80px;background:rgba(139,94,60,.08);border-radius:20px;animation:shimmer 1.5s .1s ease-in-out infinite;"></div>
+        </div>
+        <div style="padding:1rem 0;">
+            ${Array(8).fill('').map((_, i) => `
+            <div style="display:flex;gap:1rem;padding:.85rem 1.5rem;border-bottom:1px solid rgba(139,94,60,.06);">
+                <div style="height:14px;width:90px;background:rgba(139,94,60,.09);border-radius:4px;animation:shimmer 1.5s ${i*.1}s ease-in-out infinite;"></div>
+                <div style="height:14px;width:40px;background:rgba(139,94,60,.07);border-radius:4px;margin:0 auto;animation:shimmer 1.5s ${i*.1+.1}s ease-in-out infinite;"></div>
+                <div style="height:14px;width:40px;background:rgba(139,94,60,.07);border-radius:4px;margin:0 auto;animation:shimmer 1.5s ${i*.1+.2}s ease-in-out infinite;"></div>
+                <div style="height:14px;width:50px;background:rgba(139,94,60,.07);border-radius:4px;margin:0 auto;animation:shimmer 1.5s ${i*.1+.3}s ease-in-out infinite;"></div>
+                <div style="height:14px;width:60px;background:rgba(139,94,60,.07);border-radius:4px;margin:0 auto;animation:shimmer 1.5s ${i*.1+.4}s ease-in-out infinite;"></div>
+                <div style="height:14px;width:80px;background:rgba(139,94,60,.07);border-radius:4px;margin:0 auto;animation:shimmer 1.5s ${i*.1+.5}s ease-in-out infinite;"></div>
+            </div>`).join('')}
+        </div>
+        <style>@keyframes shimmer { 0%,100%{opacity:.5} 50%{opacity:1} }</style>
+    `;
+
+    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+    .then(r => r.text())
+    .then(html => {
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        const newTable = doc.querySelector('#table-wrapper');
+        if (newTable) {
+            document.getElementById('table-wrapper').innerHTML = newTable.innerHTML;
+            window.history.pushState({}, '', url);
+        }
+        finishLoading();
     });
+});
 </script>
 @endpush

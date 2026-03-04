@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\IrrigationData;
 use App\Services\IrrigationDataService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use App\Models\MusimTanam;
 
 class IrrigationController extends Controller
 {
@@ -13,8 +15,19 @@ class IrrigationController extends Controller
         // ── Prediksi AI ─────────────────────────────────────────
         $pythonPath = base_path('predict.py');
         $output     = shell_exec("python $pythonPath");
-        preg_match('/Prediksi Kebutuhan Air Besok: ([\d.]+)/', $output, $matches);
-        $forecast = (float) ($matches[1] ?? 0.0);
+        // dd($output);
+
+        preg_match('/Prediksi Kebutuhan Air Besok: ([\d.]+)/', $output, $m1);
+        preg_match('/Akurasi Model R2: ([\d.]+)/',             $output, $m2);
+        preg_match('/RMSE: ([\d.]+)/',                         $output, $m3);
+
+        $forecast  = (float) ($m1[1] ?? 0.0);
+
+        Log::info('Prediksi AI', [
+            'forecast' => $forecast,
+            'r2'       => (float) ($m2[1] ?? 0.0),
+            'rmse'     => (float) ($m3[1] ?? 0.0),
+        ]);
 
         // ── Threshold adaptif berdasarkan distribusi data historis ──
         $stats  = IrrigationData::selectRaw('AVG(kebutuhan_air) as avg, STDDEV(kebutuhan_air) as stddev')->first();
@@ -56,10 +69,14 @@ class IrrigationController extends Controller
 
         $tableData = IrrigationData::orderBy('tanggal', 'desc')->paginate(10);
 
+        $musimTanams = MusimTanam::orderBy('tanggal_mulai', 'desc')->get();
+        $mtAktif     = MusimTanam::where('status', 'berjalan')->first();
+
         return view('irrigation.index', compact(
             'labels', 'kebutuhan', 'forecast',
             'recommendation', 'tableData', 'rerata',
-            'avg', 'thresholdRendah', 'thresholdTinggi'
+            'avg', 'thresholdRendah', 'thresholdTinggi',
+            'musimTanams', 'mtAktif'
         ));
     }
 
