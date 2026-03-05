@@ -121,82 +121,89 @@
             </div>
 
             {{-- Nav --}}
-            <nav style="padding:1rem .75rem;flex:1;">
+            <nav style="padding:1rem .75rem;flex:1;overflow-y:auto;">
+
+                {{-- MENU --}}
                 <p style="font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(232,213,163,.3);padding:.5rem .5rem;margin-bottom:.25rem;">Menu</p>
                 <a href="{{ route('dashboard') }}"
-                   class="nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                class="nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
                     <span style="font-size:1rem;margin-right:.65rem;">📊</span> Dashboard
                 </a>
-                <a href="{{ route('irrigation.index') }}"
-                   class="nav-item {{ request()->routeIs('irrigation.index') ? 'active' : '' }}">
-                    <span style="font-size:1rem;margin-right:.65rem;">🗃️</span> Data Iklim
-                </a>
-                @can('view petak')
-                <a href="{{ route('petak.index') }}"
-                class="nav-item {{ request()->routeIs('petak.*') ? 'active' : '' }}">
-                    <span style="font-size:1rem;margin-right:.65rem;">🗺️</span> Master Petak
+
+                {{-- MASTER DATA --}}
+                <p style="font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(232,213,163,.3);padding:.5rem .5rem;margin-top:.75rem;margin-bottom:.25rem;">Master Data</p>
+
+                @can('view daerah_irigasi')
+                <a href="{{ route('daerah_irigasi.index') }}"
+                class="nav-item {{ request()->routeIs('daerah_irigasi.*') ? 'active' : '' }}" style="padding-left:1.5rem;">
+                    <span style="font-size:.9rem;margin-right:.65rem;">🏞️</span> Daerah Irigasi
                 </a>
                 @endcan
 
+                @can('view petak')
+                <a href="{{ route('petak.index') }}"
+                class="nav-item {{ request()->routeIs('petak.*') ? 'active' : '' }}" style="padding-left:1.5rem;">
+                    <span style="font-size:.9rem;margin-right:.65rem;">🟩</span> Petak Irigasi
+                </a>
+                @endcan
+
+                @can('view saluran')
+                <a href="{{ route('saluran.index') }}"
+                class="nav-item {{ request()->routeIs('saluran.*') ? 'active' : '' }}" style="padding-left:1.5rem;">
+                    <span style="font-size:.9rem;margin-right:.65rem;">〰️</span> Saluran
+                </a>
+                @endcan
+
+                {{-- OPERASIONAL --}}
+                <p style="font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(232,213,163,.3);padding:.5rem .5rem;margin-top:.75rem;margin-bottom:.25rem;">Operasional</p>
+
+                <a href="{{ route('irrigation.index') }}"
+                class="nav-item {{ request()->routeIs('irrigation.index') ? 'active' : '' }}" style="padding-left:1.5rem;">
+                    <span style="font-size:.9rem;margin-right:.65rem;">🗃️</span> Data Iklim
+                </a>
+
                 @can('view musim-tanam')
                 <a href="{{ route('musim-tanam.index') }}"
-                class="nav-item {{ request()->routeIs('musim-tanam.*') ? 'active' : '' }}">
-                    <span style="font-size:1rem;margin-right:.65rem;">🌱</span> Musim Tanam
+                class="nav-item {{ request()->routeIs('musim-tanam.*') ? 'active' : '' }}" style="padding-left:1.5rem;">
+                    <span style="font-size:.9rem;margin-right:.65rem;">🌱</span> Musim Tanam
                 </a>
                 @endcan
 
                 @can('view blangko-op')
                 <a href="{{ route('blangko-op.index') }}"
-                class="nav-item {{ request()->routeIs('blangko-op.*') ? 'active' : '' }}">
-                    <span style="font-size:1rem;margin-right:.65rem;">📋</span> Blangko OP
+                class="nav-item {{ request()->routeIs('blangko-op.*') ? 'active' : '' }}" style="padding-left:1.5rem;">
+                    <span style="font-size:.9rem;margin-right:.65rem;">📋</span> Blangko OP
                 </a>
                 @endcan
-
-                <a href="{{ route('grafik.index') }}"
-                class="nav-item {{ request()->routeIs('grafik.*') ? 'active' : '' }}">
-                    <span style="font-size:1rem;margin-right:.65rem;">📈</span> Grafik & Analisis
-                </a>
 
                 @can('view rtt')
                 <a href="{{ route('rtt.index') }}"
-                class="nav-item {{ request()->routeIs('rtt.*') ? 'active' : '' }}">
-                    <span style="font-size:1rem;margin-right:.65rem;">🗓️</span> RTT
+                class="nav-item {{ request()->routeIs('rtt.*') ? 'active' : '' }}" style="padding-left:1.5rem;">
+                    <span style="font-size:.9rem;margin-right:.65rem;">🗓️</span> RTT
                 </a>
                 @endcan
 
+                {{-- ANALISIS & LAPORAN --}}
+                <p style="font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(232,213,163,.3);padding:.5rem .5rem;margin-top:.75rem;margin-bottom:.25rem;">Analisis & Laporan</p>
+
+                <a href="{{ route('grafik.index') }}"
+                class="nav-item {{ request()->routeIs('grafik.*') ? 'active' : '' }}" style="padding-left:1.5rem;">
+                    <span style="font-size:.9rem;margin-right:.65rem;">📈</span> Grafik & Analisis
+                </a>
+
                 @can('view peta')
                 <a href="{{ route('peta.index') }}"
-                class="nav-item {{ request()->routeIs('peta.*') ? 'active' : '' }}">
-                    <span style="font-size:1rem;margin-right:.65rem;">🗺️</span> Peta Irigasi
+                class="nav-item {{ request()->routeIs('peta.*') ? 'active' : '' }}" style="padding-left:1.5rem;">
+                    <span style="font-size:.9rem;margin-right:.65rem;">🗺️</span> Peta Irigasi
                 </a>
                 @endcan
 
                 <a href="{{ route('laporan.index') }}"
-                class="nav-item {{ request()->routeIs('laporan.*') ? 'active' : '' }}">
-                    <span style="font-size:1rem;margin-right:.65rem;">📑</span> Laporan
+                class="nav-item {{ request()->routeIs('laporan.*') ? 'active' : '' }}" style="padding-left:1.5rem;">
+                    <span style="font-size:.9rem;margin-right:.65rem;">📑</span> Laporan
                 </a>
-            </nav>
 
-            {{-- User --}}
-            <div style="padding:1rem 1.25rem;border-top:1px solid rgba(255,255,255,.07);">
-                <div style="display:flex;align-items:center;gap:.75rem;">
-                    <div style="width:34px;height:34px;border-radius:50%;background:rgba(106,171,154,.25);border:1px solid rgba(106,171,154,.3);display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:700;color:var(--water2);font-size:.9rem;flex-shrink:0;">
-                        {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
-                    </div>
-                    <div style="min-width:0;flex:1;">
-                        <p style="font-size:.8rem;font-weight:600;color:var(--straw);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ Auth::user()->name }}</p>
-                        <p style="font-size:.68rem;color:rgba(232,213,163,.4);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ Auth::user()->email }}</p>
-                    </div>
-                </div>
-                <form method="POST" action="{{ route('logout') }}" style="margin-top:.75rem;">
-                    @csrf
-                    <button type="submit" style="width:100%;padding:.45rem;background:rgba(185,74,60,.12);border:1px solid rgba(185,74,60,.2);color:rgba(232,213,163,.5);border-radius:6px;font-size:.75rem;font-family:'Karla',sans-serif;cursor:pointer;transition:all .2s;"
-                        onmouseover="this.style.background='rgba(185,74,60,.22)';this.style.color='#e8a090';"
-                        onmouseout="this.style.background='rgba(185,74,60,.12)';this.style.color='rgba(232,213,163,.5)';">
-                        Keluar
-                    </button>
-                </form>
-            </div>
+            </nav>
         </div>
 
         {{-- Main --}}
@@ -210,15 +217,44 @@
                         @yield('page-title', 'Dashboard')
                     </h1>
                 </div>
-                <div style="display:flex;align-items:center;gap:.75rem;">
-                    <div style="width:34px;height:34px;border-radius:50%;background:rgba(106,171,154,.25);border:1px solid rgba(106,171,154,.3);display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:700;color:var(--water2);font-size:.9rem;">
-                        {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
-                    </div>
-                    <div style="min-width:0;">
-                        <p style="font-size:.8rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ Auth::user()->name }}</p>
-                        <p style="font-size:.68rem;color:var(--textlt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ Auth::user()->email }}</p>
-                    </div>
+
+        {{-- Dropdown Profile --}}
+        <div style="position:relative;" id="profile-dropdown-wrapper">
+            <button onclick="toggleProfileDropdown()"
+                style="display:flex;align-items:center;gap:.75rem;background:none;border:none;cursor:pointer;padding:.4rem .6rem;border-radius:8px;transition:background .2s;"
+                onmouseover="this.style.background='rgba(139,94,60,.08)'"
+                onmouseout="this.style.background='none'">
+                <div style="width:34px;height:34px;border-radius:50%;background:rgba(106,171,154,.25);border:1px solid rgba(106,171,154,.3);display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:700;color:var(--water2);font-size:.9rem;flex-shrink:0;">
+                    {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
                 </div>
+                <div style="min-width:0;text-align:left;">
+                    <p style="font-size:.8rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ Auth::user()->name }}</p>
+                    <p style="font-size:.68rem;color:var(--textlt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ Auth::user()->email }}</p>
+                </div>
+                <svg style="width:14px;height:14px;color:var(--textlt);margin-left:.25rem;flex-shrink:0;" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+
+            {{-- Dropdown Menu --}}
+            <div id="profile-dropdown"
+                style="display:none;position:absolute;right:0;top:calc(100% + .5rem);background:var(--cream);border:1px solid var(--border);border-radius:10px;box-shadow:0 4px 20px rgba(61,43,31,.1);min-width:180px;z-index:100;overflow:hidden;">
+                <a href="#"
+                    style="display:flex;align-items:center;gap:.65rem;padding:.75rem 1rem;font-size:.85rem;color:var(--text);text-decoration:none;transition:background .2s;"
+                    onmouseover="this.style.background='rgba(139,94,60,.06)'"
+                    onmouseout="this.style.background='none'">
+                    <span>👤</span> Profil
+                </a>
+                <div style="height:1px;background:var(--border);margin:0 .75rem;"></div>
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit"
+                        style="display:flex;align-items:center;gap:.65rem;padding:.75rem 1rem;font-size:.85rem;color:#a03828;background:none;border:none;cursor:pointer;width:100%;font-family:'Karla',sans-serif;transition:background .2s;"
+                        onmouseover="this.style.background='rgba(185,74,60,.06)'"
+                        onmouseout="this.style.background='none'">
+                        <span>🚪</span> Keluar
+                    </button>
+                </form>
+            </div>
+        </div>
             </header>
 
             <style>@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.4)} }</style>
@@ -272,6 +308,20 @@
             // Jangan overlay untuk form hapus (inline di tabel)
             if (!e.target.closest('#table-wrapper')) showOverlay();
         });
+
+        function toggleProfileDropdown() {
+            const dd = document.getElementById('profile-dropdown');
+            dd.style.display = dd.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // Tutup dropdown kalau klik di luar
+        document.addEventListener('click', function(e) {
+            const wrapper = document.getElementById('profile-dropdown-wrapper');
+            if (wrapper && !wrapper.contains(e.target)) {
+                document.getElementById('profile-dropdown').style.display = 'none';
+            }
+        });
+
     </script>
 
 </body>

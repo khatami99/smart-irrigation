@@ -296,6 +296,15 @@
     #map { height: 60vw; min-height: 320px; }
     #sidebar { width: 100%; }
 }
+
+/* ── Tombol "X" Popup map ─────────────────────────────── */
+.leaflet-popup-close-button {
+    pointer-events: auto !important;
+}
+
+.leaflet-popup-close-button:hover {
+    text-decoration: none !important;
+}
 </style>
 @endpush
 
@@ -606,6 +615,16 @@ const map = L.map('map', {
     center: [-2.2, 114.0],
     zoom: 10,
     zoomControl: true,
+});
+
+map.on('popupopen', function(e) {
+    const closeBtn = e.popup._closeButton;
+    if (closeBtn) {
+        closeBtn.addEventListener('click', function(ev) {
+            ev.preventDefault();
+            ev.stopPropagation();
+        });
+    }
 });
 
 const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -994,21 +1013,36 @@ function openEditFeature(featureId) {
     fetch('/peta/geojson').then(r => r.json()).then(data => {
         const feat = data.features.find(f => f.id == featureId);
         if (!feat) return;
-        const p = feat.properties;
+        const p        = feat.properties;
+        const kategori = p.layer_kategori || '';
 
-        document.getElementById('featureModalTitle').textContent = '✏️ Edit Info Area';
-        document.getElementById('edit-feature-id').value    = featureId;
-        document.getElementById('feature-layer-id').value   = p.layer_id;
-        document.getElementById('feature-geojson').value    = JSON.stringify(feat.geometry);
-        document.getElementById('feature-nama').value       = p.nama;
-        document.getElementById('feature-luas').value       = p.luas_manual || '';
-        document.getElementById('feature-deskripsi').value  = p.deskripsi || '';
+        document.getElementById('featureModalTitle').textContent = '✏️ Edit Info';
+        document.getElementById('edit-feature-id').value   = featureId;
+        document.getElementById('feature-layer-id').value  = p.layer_id;
+        document.getElementById('feature-layer-tipe').value = kategori;
+        document.getElementById('feature-geojson').value   = JSON.stringify(feat.geometry);
+        document.getElementById('feature-nama').value      = p.nama;
+        document.getElementById('feature-deskripsi').value = p.deskripsi || '';
 
-        // Set petak jika ada
-        const petakSel = document.getElementById('feature-petak');
-        petakSel.value = '';
-        for (let opt of petakSel.options) {
-            if (opt.text.startsWith(p.petak_kode + ' —')) { opt.selected = true; break; }
+        // Toggle field
+        document.getElementById('fields-polygon').style.display  = kategori === 'petak'   ? 'block' : 'none';
+        document.getElementById('fields-polyline').style.display = kategori === 'saluran' ? 'block' : 'none';
+
+        // Isi field petak
+        if (kategori === 'petak') {
+            document.getElementById('feature-luas').value       = p.luas_manual || '';
+            document.getElementById('feature-kode-petak').value = p.petak_kode || '';
+            document.getElementById('feature-pintu-air').value  = p.petak_pintu_air || '';
+            document.getElementById('feature-pj').value         = p.petak_pj || '';
+            document.getElementById('feature-status-petak').value = p.petak_status || 'aktif';
+        }
+
+        // Isi field saluran
+        if (kategori === 'saluran') {
+            document.getElementById('feature-tipe-saluran').value    = p.saluran_tipe || 'sekunder';
+            document.getElementById('feature-panjang-km').value      = p.saluran_panjang || '';
+            document.getElementById('feature-kondisi-saluran').value = p.saluran_kondisi || 'baik';
+            document.getElementById('feature-pj-saluran').value      = p.saluran_pj || '';
         }
 
         openModal('featureModal');
@@ -1017,24 +1051,22 @@ function openEditFeature(featureId) {
 
 // Edit geometri (bentuk/posisi di peta)
 function editGeometry(featureId) {
-    // Tutup popup dulu
     map.closePopup();
 
     fetch('/peta/geojson').then(r => r.json()).then(data => {
         const feat = data.features.find(f => f.id == featureId);
         if (!feat) return;
 
-        const tipe  = feat.properties.layer_tipe;
         const warna = feat.properties.warna || '#4a7c6f';
 
-        // Load geometry ke drawnItems agar bisa diedit
         drawnItems.clearLayers();
-        const geomLayer = L.geoJSON(feat, {
-            style: { color: warna, weight: 3, fillColor: warna, fillOpacity: .25 }
-        }).getLayers()[0];
-        drawnItems.addLayer(geomLayer);
 
-        // Aktifkan draw control mode EDIT saja
+        const geomLayer = L.geoJSON(feat.geometry, {
+            style: { color: warna, weight: 3, fillColor: warna, fillOpacity: .35 }
+        });
+
+        geomLayer.eachLayer(l => drawnItems.addLayer(l));
+
         if (drawControl) map.removeControl(drawControl);
         drawControl = new L.Control.Draw({
             draw: {
@@ -1045,16 +1077,19 @@ function editGeometry(featureId) {
         });
         map.addControl(drawControl);
 
-        // Simpan data feature yang diedit
         pendingEditFeatureId    = featureId;
         pendingEditFeatureProps = feat.properties;
 
-        // Zoom ke feature
-        try { map.fitBounds(drawnItems.getBounds().pad(0.2)); } catch(e) {}
+        try { map.fitBounds(drawnItems.getBounds().pad(0.3)); } catch(e) {}
 
-        showToast('📐 Mode edit geometri aktif. Geser titik lalu klik <b>Save</b> di toolbar peta.', 'warn');
+        // Auto-click tombol edit
+        setTimeout(() => {
+            const editBtn = document.querySelector('.leaflet-draw-edit-edit');
+            if (editBtn) editBtn.click();
+        }, 500);
 
-        // Tampilkan panel info edit geometri
+        showToast('📐 Mode edit geometri aktif. Geser titik lalu klik Save di toolbar peta.', 'warn');
+
         document.getElementById('draw-hint').style.display       = 'flex';
         document.getElementById('draw-hint').innerHTML           = '💡 <span>Geser titik untuk edit bentuk. Klik <b>Save</b> di toolbar atas peta bila selesai.</span>';
         document.getElementById('btn-cancel-draw').style.display  = 'flex';
@@ -1074,24 +1109,35 @@ map.on(L.Draw.Event.EDITED, function(e) {
         document.getElementById('feature-geojson').value = JSON.stringify(l.toGeoJSON().geometry);
     });
 
-    // Isi form dengan data lama
-    const p = pendingEditFeatureProps;
+    const p        = pendingEditFeatureProps;
+    const kategori = p.layer_kategori || '';
+
     document.getElementById('featureModalTitle').textContent = '📐 Simpan Perubahan Geometri';
     document.getElementById('edit-feature-id').value    = pendingEditFeatureId;
     document.getElementById('feature-layer-id').value   = p.layer_id;
+    document.getElementById('feature-layer-tipe').value = kategori;
     document.getElementById('feature-nama').value       = p.nama;
-    document.getElementById('feature-luas').value       = p.luas_manual || '';
     document.getElementById('feature-deskripsi').value  = p.deskripsi || '';
 
-    const petakSel = document.getElementById('feature-petak');
-    petakSel.value = '';
-    if (p.petak_kode) {
-        for (let opt of petakSel.options) {
-            if (opt.text.startsWith(p.petak_kode + ' —')) { opt.selected = true; break; }
-        }
+    // Toggle field
+    document.getElementById('fields-polygon').style.display  = kategori === 'petak'   ? 'block' : 'none';
+    document.getElementById('fields-polyline').style.display = kategori === 'saluran' ? 'block' : 'none';
+
+    if (kategori === 'petak') {
+        document.getElementById('feature-luas').value        = p.luas_manual || '';
+        document.getElementById('feature-kode-petak').value  = p.petak_kode || '';
+        document.getElementById('feature-pintu-air').value   = p.petak_pintu_air || '';
+        document.getElementById('feature-pj').value          = p.petak_pj || '';
+        document.getElementById('feature-status-petak').value = p.petak_status || 'aktif';
     }
 
-    // Cleanup
+    if (kategori === 'saluran') {
+        document.getElementById('feature-tipe-saluran').value    = p.saluran_tipe || 'sekunder';
+        document.getElementById('feature-panjang-km').value      = p.saluran_panjang || '';
+        document.getElementById('feature-kondisi-saluran').value = p.saluran_kondisi || 'baik';
+        document.getElementById('feature-pj-saluran').value      = p.saluran_pj || '';
+    }
+
     pendingEditFeatureId    = null;
     pendingEditFeatureProps = null;
     cancelDraw();

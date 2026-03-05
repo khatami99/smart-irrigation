@@ -7,6 +7,7 @@ use App\Models\Petak;
 use App\Models\Saluran;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use App\Models\DaerahIrigasi;
 
 class PetaController extends Controller
 {
@@ -87,6 +88,12 @@ class PetaController extends Controller
     {
         $layer = MapLayer::findOrFail($request->map_layer_id);
 
+        Log::info('storeFeature debug', [
+            'layer_kategori' => $layer->kategori,
+            'kode_petak'     => $request->kode_petak,
+            'filled'         => $request->filled('kode_petak'),
+        ]);
+
         $data = $request->validate([
             'map_layer_id'        => 'required|exists:map_layers,id',
             'nama'                => 'required|string|max:150',
@@ -115,9 +122,23 @@ class PetaController extends Controller
             'warna'        => $data['warna'] ?? null,
         ]);
 
+        // ── Auto-sync Daerah Irigasi ──────────────────────────────
+        if ($layer->kategori === 'daerah_irigasi') {
+            DaerahIrigasi::create([
+                'map_feature_id'   => $feature->id,
+                'kode'             => $data['kode_di'] ?? 'DI-' . $feature->id,
+                'nama'             => $data['nama'],
+                'luas_total'       => $data['luas_manual'] ?? null,
+                'penanggung_jawab' => $data['pj_di'] ?? null,
+                'status'           => 'aktif',
+            ]);
+        }
+
         // ── Auto-sync Petak ───────────────────────────────────
         if ($layer->kategori === 'petak' && $request->filled('kode_petak')) {
+            Log::info('Masuk kondisi petak sync');
             $petak = Petak::where('kode_petak', $request->kode_petak)->first();
+            Log::info('Hasil cek petak', ['existing' => $petak?->id, 'feature_id' => $feature->id]);
 
             if ($petak) {
                 $petak->update([
@@ -200,7 +221,19 @@ class PetaController extends Controller
             'warna'       => $data['warna'] ?? null,
         ]);
 
-        // ── Auto-sync update ──────────────────────────────────
+        // ── Auto-sync update daerah irigasi ──────────────────────────────────
+        if ($layer->kategori === 'daerah_irigasi') {
+            $di = DaerahIrigasi::where('map_feature_id', $feature->id)->first();
+            if ($di) {
+                $di->update([
+                    'nama'             => $data['nama'],
+                    'luas_total'       => $data['luas_manual'] ?? $di->luas_total,
+                    'penanggung_jawab' => $data['pj_di'] ?? $di->penanggung_jawab,
+                ]);
+            }
+        }
+
+        // ── Auto-sync update petak ──────────────────────────────────
         if ($layer->kategori === 'petak') {
             $petak = Petak::where('map_feature_id', $feature->id)->first();
             if ($petak) {
@@ -215,6 +248,7 @@ class PetaController extends Controller
             }
         }
 
+        // ── Auto-sync update saluran ──────────────────────────────────
         if ($layer->kategori === 'saluran') {
             $saluran = Saluran::where('map_feature_id', $feature->id)->first();
             if ($saluran) {
@@ -239,7 +273,8 @@ class PetaController extends Controller
 
     public function destroyFeature(MapFeature $feature)
     {
-        // Soft delete petak/saluran terkait juga
+        // Soft delete daerah irigasi/petak/saluran terkait
+        DaerahIrigasi::where('map_feature_id', $feature->id)->delete();
         Petak::where('map_feature_id', $feature->id)->update(['map_feature_id' => null]);
         Saluran::where('map_feature_id', $feature->id)->delete();
 

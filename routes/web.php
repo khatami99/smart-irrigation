@@ -10,6 +10,8 @@ use App\Http\Controllers\GrafikController;
 use App\Http\Controllers\RttController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\PetaController;
+use App\Http\Controllers\DaerahIrigasiController;
+use App\Http\Controllers\SaluranController;
 
 Route::get('/', function () {
     $latest = \App\Models\IrrigationData::orderBy('tanggal', 'desc')->first();
@@ -46,6 +48,8 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/irrigation/{irrigationData}', [IrrigationController::class, 'update'])->name('irrigation.update');
     Route::delete('/irrigation/{irrigationData}', [IrrigationController::class, 'destroy'])->name('irrigation.destroy');
     Route::resource('petak', PetakController::class)->except(['show']);
+    Route::resource('daerah_irigasi', DaerahIrigasiController::class)->except(['show']);
+    Route::resource('saluran', SaluranController::class)->except(['show']);
     Route::resource('musim-tanam', MusimTanamController::class)->except(['show']);
     Route::resource('blangko-op', BlangkoOpController::class)->except(['show']);
     Route::get('/grafik', [GrafikController::class, 'index'])->name('grafik.index');

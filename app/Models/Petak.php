@@ -19,6 +19,9 @@ class Petak extends Model
         'penanggung_jawab',
         'status',
         'keterangan',
+        'latitude',
+        'longitude',
+        'map_feature_id',
     ];
 
     // Scope: hanya petak aktif

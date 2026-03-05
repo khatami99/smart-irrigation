@@ -72,11 +72,42 @@ class IrrigationController extends Controller
         $musimTanams = MusimTanam::orderBy('tanggal_mulai', 'desc')->get();
         $mtAktif     = MusimTanam::where('status', 'berjalan')->first();
 
+        // ── Data peta mini dashboard ─────────────────────────────
+        $petaksPeta = \App\Models\Petak::with(['rtt' => function($q) use ($mtAktif) {
+            if ($mtAktif) $q->where('musim_tanam_id', $mtAktif->id);
+            $q->latest();
+        }])
+        ->whereNotNull('latitude')
+        ->whereNotNull('longitude')
+        ->where('status', 'aktif')
+        ->get()
+        ->map(function($petak) {
+            $rtt = $petak->rtt->first();
+            $warna = match($rtt?->status) {
+                'berjalan'  => '#4a7c6f',
+                'terlambat' => '#b94a3c',
+                'rencana'   => '#c4895a',
+                'selesai'   => '#5a7a47',
+                default     => '#7a6355',
+            };
+            return [
+                'id'       => $petak->id,
+                'nama'     => $petak->nama_petak,
+                'kode'     => $petak->kode_petak,
+                'lat'      => (float) $petak->latitude,
+                'lng'      => (float) $petak->longitude,
+                'luas'     => $petak->luas_area,
+                'status'   => $rtt?->status ?? 'belum ada RTT',
+                'warna'    => $warna,
+            ];
+        });
+
         return view('irrigation.index', compact(
             'labels', 'kebutuhan', 'forecast',
             'recommendation', 'tableData', 'rerata',
             'avg', 'thresholdRendah', 'thresholdTinggi',
-            'musimTanams', 'mtAktif'
+            'musimTanams', 'mtAktif',
+            'petaksPeta'
         ));
     }
 

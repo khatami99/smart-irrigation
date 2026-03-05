@@ -165,6 +165,42 @@
     </div>
 </div>
 
+{{-- Peta Mini --}}
+<div class="card" style="padding:1.75rem;margin-bottom:1.75rem;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.25rem;">
+        <div>
+            <p style="font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--textlt);margin-bottom:.3rem;">Sebaran Wilayah</p>
+            <h3 style="font-family:'Fraunces',serif;font-size:1.15rem;font-weight:600;color:var(--soil);">Peta Status Petak Irigasi</h3>
+            <p style="font-size:.72rem;color:var(--textlt);margin-top:.2rem;">Warna marker berdasarkan status RTT musim tanam aktif</p>
+        </div>
+        <a href="{{ route('peta.index') }}"
+            style="font-size:.75rem;color:var(--water);text-decoration:none;font-weight:600;">
+            Lihat peta lengkap →
+        </a>
+    </div>
+
+{{-- Legenda --}}
+    <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;">
+        <div style="display:flex;align-items:center;gap:.4rem;font-size:.75rem;color:var(--textlt);">
+            <div style="width:10px;height:10px;border-radius:50%;background:#4a7c6f;"></div> Berjalan
+        </div>
+        <div style="display:flex;align-items:center;gap:.4rem;font-size:.75rem;color:var(--textlt);">
+            <div style="width:10px;height:10px;border-radius:50%;background:#b94a3c;"></div> Terlambat
+        </div>
+        <div style="display:flex;align-items:center;gap:.4rem;font-size:.75rem;color:var(--textlt);">
+            <div style="width:10px;height:10px;border-radius:50%;background:#c4895a;"></div> Rencana
+        </div>
+        <div style="display:flex;align-items:center;gap:.4rem;font-size:.75rem;color:var(--textlt);">
+            <div style="width:10px;height:10px;border-radius:50%;background:#5a7a47;"></div> Selesai
+        </div>
+        <div style="display:flex;align-items:center;gap:.4rem;font-size:.75rem;color:var(--textlt);">
+            <div style="width:10px;height:10px;border-radius:50%;background:#7a6355;"></div> Belum ada RTT
+        </div>
+    </div>
+
+    <div id="mini-map" style="height:320px;border-radius:10px;border:1px solid var(--border);"></div>
+</div>
+
 {{-- Tabel --}}
 <div id="table-wrapper" class="card" style="overflow:hidden;">
     @include('irrigation.partials.table', ['tableData' => $tableData])
@@ -283,4 +319,48 @@ document.addEventListener('click', function(e) {
     });
 });
 </script>
+
+{{-- Peta Mini --}}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    const petakData = @json($petaksPeta);
+
+    const miniMap = L.map('mini-map', { zoomControl: true, scrollWheelZoom: false });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap'
+    }).addTo(miniMap);
+
+    if (petakData.length > 0) {
+        const markers = [];
+        petakData.forEach(function(p) {
+            const marker = L.circleMarker([p.lat, p.lng], {
+                radius: 10,
+                fillColor: p.warna,
+                color: '#fff',
+                weight: 2,
+                opacity: 1,
+                fillOpacity: 0.85
+            }).addTo(miniMap);
+
+            marker.bindPopup(`
+                <div style="font-family:'Karla',sans-serif;min-width:160px;">
+                    <p style="font-weight:700;font-size:.9rem;margin-bottom:.25rem;">${p.nama}</p>
+                    <p style="font-size:.75rem;color:#7a6355;margin-bottom:.2rem;">Kode: <strong>${p.kode}</strong></p>
+                    <p style="font-size:.75rem;color:#7a6355;margin-bottom:.2rem;">Luas: <strong>${p.luas} ha</strong></p>
+                    <p style="font-size:.75rem;">Status RTT: <strong style="color:${p.warna}">${p.status}</strong></p>
+                </div>
+            `);
+            markers.push(marker);
+        });
+
+        // Auto-fit ke semua marker
+        const group = L.featureGroup(markers);
+        miniMap.fitBounds(group.getBounds().pad(0.2));
+    } else {
+        // Default view kalau belum ada petak dengan koordinat
+        miniMap.setView([-2.5489, 115.7624], 9);
+    }
+</script>
+
 @endpush

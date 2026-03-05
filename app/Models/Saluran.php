@@ -10,7 +10,8 @@ class Saluran extends Model
 
     protected $fillable = [
         'map_feature_id', 'nama', 'tipe',
-        'panjang_km', 'kondisi', 'penanggung_jawab', 'keterangan',
+        'panjang_km', 'kondisi', 'penanggung_jawab',
+        'latitude', 'longitude', 'keterangan',
     ];
 
     public function mapFeature()
