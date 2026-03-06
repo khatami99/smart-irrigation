@@ -22,6 +22,7 @@ class Petak extends Model
         'latitude',
         'longitude',
         'map_feature_id',
+        'daerah_irigasi_id',
     ];
 
     // Scope: hanya petak aktif
@@ -45,5 +46,15 @@ class Petak extends Model
     public function getHasPetaAttribute(): bool
     {
         return !is_null($this->map_feature_id);
+    }
+
+    public function daerahIrigasi()
+    {
+        return $this->belongsTo(DaerahIrigasi::class);
+    }
+
+    public function rtt()
+    {
+        return $this->hasMany(Rtt::class);
     }
 }

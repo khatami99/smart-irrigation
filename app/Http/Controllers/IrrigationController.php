@@ -72,42 +72,75 @@ class IrrigationController extends Controller
         $musimTanams = MusimTanam::orderBy('tanggal_mulai', 'desc')->get();
         $mtAktif     = MusimTanam::where('status', 'berjalan')->first();
 
-        // ── Data peta mini dashboard ─────────────────────────────
-        $petaksPeta = \App\Models\Petak::with(['rtt' => function($q) use ($mtAktif) {
-            if ($mtAktif) $q->where('musim_tanam_id', $mtAktif->id);
-            $q->latest();
-        }])
-        ->whereNotNull('latitude')
-        ->whereNotNull('longitude')
+        // ── Data peta mini dashboard (per Daerah Irigasi) ────────
+        $mtId = $mtAktif?->id;
+        $daerahIrigasiPeta = \App\Models\DaerahIrigasi::with([
+            'mapFeature',
+            'petaks.rtt' => function($q) use ($mtId) {
+                if ($mtId) $q->where('musim_tanam_id', $mtId);
+            }
+        ])
+        ->whereNotNull('map_feature_id')
         ->where('status', 'aktif')
         ->get()
-        ->map(function($petak) {
-            $rtt = $petak->rtt->first();
-            $warna = match($rtt?->status) {
+        ->map(function($di) use ($mtId) {
+            $statusRtt = $di->getStatusRttAttribute($mtId);
+            $warna = match($statusRtt) {
+                'berjalan'     => '#4a7c6f',
+                'terlambat'    => '#b94a3c',
+                'rencana'      => '#c4895a',
+                'selesai'      => '#5a7a47',
+                default        => '#7a6355',
+            };
+            return [
+                'nama'      => $di->nama,
+                'kode'      => $di->kode,
+                'luas'      => $di->luas_total ?? '—',
+                'status'    => $statusRtt,
+                'warna'     => $warna,
+                'geojson'   => $di->mapFeature?->geojson,
+            ];
+        })->filter(fn($di) => !is_null($di['geojson']))->values();
+
+        // ── Data kartu per DI ────────────────────────────────────
+        $diKartu = \App\Models\DaerahIrigasi::with([
+            'petaks.rtt' => function($q) use ($mtId) {
+                if ($mtId) $q->where('musim_tanam_id', $mtId);
+            }
+        ])
+        ->where('status', 'aktif')
+        ->get()
+        ->map(function($di) use ($mtId) {
+            $rtts = $di->petaks->flatMap->rtt;
+            $statusRtt = $di->getStatusRttAttribute($mtId);
+            $warna = match($statusRtt) {
                 'berjalan'  => '#4a7c6f',
                 'terlambat' => '#b94a3c',
                 'rencana'   => '#c4895a',
                 'selesai'   => '#5a7a47',
                 default     => '#7a6355',
             };
+            $progressAvg = $rtts->count() > 0
+                ? (int) round($rtts->avg(fn($r) => $r->progress))
+                : 0;
+
             return [
-                'id'       => $petak->id,
-                'nama'     => $petak->nama_petak,
-                'kode'     => $petak->kode_petak,
-                'lat'      => (float) $petak->latitude,
-                'lng'      => (float) $petak->longitude,
-                'luas'     => $petak->luas_area,
-                'status'   => $rtt?->status ?? 'belum ada RTT',
-                'warna'    => $warna,
+                'nama'        => $di->nama,
+                'kode'        => $di->kode,
+                'total_petak' => $di->petaks->count(),
+                'total_luas'  => $di->petaks->sum('luas_area'),
+                'status'      => $statusRtt,
+                'warna'       => $warna,
+                'progress'    => $progressAvg,
             ];
         });
-
         return view('irrigation.index', compact(
             'labels', 'kebutuhan', 'forecast',
             'recommendation', 'tableData', 'rerata',
             'avg', 'thresholdRendah', 'thresholdTinggi',
             'musimTanams', 'mtAktif',
-            'petaksPeta'
+            'daerahIrigasiPeta',
+            'diKartu',
         ));
     }
 

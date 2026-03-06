@@ -52,7 +52,8 @@ class PetakController extends BaseController
 
     public function edit(Petak $petak)
     {
-        return view('petak.edit', compact('petak'));
+        $daerahIrigasis = \App\Models\DaerahIrigasi::where('status', 'aktif')->orderBy('kode')->get();
+        return view('petak.edit', compact('petak', 'daerahIrigasis'));
     }
 
     public function update(Request $request, Petak $petak)
@@ -68,6 +69,7 @@ class PetakController extends BaseController
             'keterangan'        => 'nullable|string',
             'latitude'  => 'nullable|numeric|between:-90,90',
             'longitude' => 'nullable|numeric|between:-180,180',
+            'daerah_irigasi_id' => 'nullable|exists:daerah_irigasis,id',
         ]);
 
         $petak->update($request->all());

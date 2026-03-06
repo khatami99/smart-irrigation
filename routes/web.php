@@ -54,6 +54,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('blangko-op', BlangkoOpController::class)->except(['show']);
     Route::get('/grafik', [GrafikController::class, 'index'])->name('grafik.index');
     Route::get('/grafik/data', [GrafikController::class, 'data'])->name('grafik.data');
+    Route::get('/rtt/daerah-irigasi/{daerahIrigasi}', [RttController::class, 'showByDI'])->name('rtt.by-di');
     Route::resource('rtt', RttController::class)->except(['show']);
 
     // Laporan

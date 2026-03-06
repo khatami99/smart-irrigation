@@ -61,6 +61,21 @@
             </div>
 
             <div style="margin-bottom:1.5rem;">
+                <p class="section-label">🏞️ Daerah Irigasi</p>
+                <div>
+                    <label class="form-label">Daerah Irigasi <span>(opsional)</span></label>
+                    <select name="daerah_irigasi_id" class="form-input">
+                        <option value="">— Belum ditentukan —</option>
+                        @foreach($daerahIrigasis as $di)
+                        <option value="{{ $di->id }}" {{ old('daerah_irigasi_id', $petak->daerah_irigasi_id) == $di->id ? 'selected' : '' }}>
+                            {{ $di->kode }} — {{ $di->nama }}
+                        </option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+
+            <div style="margin-bottom:1.5rem;">
                 <p class="section-label">📐 Detail Area</p>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
                     <div>

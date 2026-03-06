@@ -201,6 +201,90 @@
     <div id="mini-map" style="height:320px;border-radius:10px;border:1px solid var(--border);"></div>
 </div>
 
+{{-- Kartu Musim Tanam Aktif --}}
+@if($mtAktif)
+<div class="card" style="padding:1.75rem;margin-bottom:1.75rem;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.25rem;">
+        <div>
+            <p style="font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--textlt);margin-bottom:.3rem;">Musim Tanam Aktif</p>
+            <h3 style="font-family:'Fraunces',serif;font-size:1.15rem;font-weight:600;color:var(--soil);">{{ $mtAktif->nama_mt }}</h3>
+            <p style="font-size:.72rem;color:var(--textlt);margin-top:.2rem;">
+                {{ $mtAktif->tanggal_mulai->format('d M Y') }} — {{ $mtAktif->tanggal_selesai->format('d M Y') }}
+                · {{ $mtAktif->durasi_hari }} hari
+            </p>
+        </div>
+        <a href="{{ route('musim-tanam.index') }}"
+            style="font-size:.75rem;color:var(--water);text-decoration:none;font-weight:600;">
+            Lihat detail →
+        </a>
+    </div>
+
+    {{-- Progress Bar --}}
+    <div style="margin-bottom:1.25rem;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem;">
+            <span style="font-size:.75rem;font-weight:600;color:var(--textlt);">Progress Musim Tanam</span>
+            <span style="font-size:.75rem;font-weight:700;color:var(--water);">{{ $mtAktif->progress }}%</span>
+        </div>
+        <div style="background:rgba(139,94,60,.1);border-radius:99px;height:8px;overflow:hidden;">
+            <div style="height:100%;border-radius:99px;background:linear-gradient(90deg,var(--water),var(--water2));width:{{ $mtAktif->progress }}%;transition:width .5s ease;"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:.4rem;">
+            <span style="font-size:.65rem;color:var(--textlt);">Mulai</span>
+            <span style="font-size:.65rem;color:var(--textlt);">Selesai</span>
+        </div>
+    </div>
+
+{{-- Stats per DI --}}
+@if($diKartu->count() > 0)
+<div style="display:flex;gap:1rem;overflow-x:auto;padding-bottom:.5rem;scrollbar-width:thin;scrollbar-color:rgba(139,94,60,.2) transparent;">
+    @foreach($diKartu as $di)
+    <div style="background:var(--cream2);border:1px solid var(--border);border-radius:10px;padding:1rem;flex-shrink:0;width:280px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.75rem;">
+            <div>
+                <p style="font-size:.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--textlt);">{{ $di['kode'] }}</p>
+                <p style="font-family:'Fraunces',serif;font-size:.95rem;font-weight:600;color:var(--soil);">{{ $di['nama'] }}</p>
+            </div>
+            <span style="background:{{ $di['warna'] }}20;border:1px solid {{ $di['warna'] }}40;color:{{ $di['warna'] }};border-radius:6px;font-size:.68rem;font-weight:700;padding:.2rem .6rem;text-transform:uppercase;">
+                {{ $di['status'] }}
+            </span>
+        </div>
+
+        {{-- Progress bar per DI --}}
+        <div style="margin-bottom:.75rem;">
+            <div style="display:flex;justify-content:space-between;margin-bottom:.3rem;">
+                <span style="font-size:.7rem;color:var(--textlt);">Progress RTT</span>
+                <span style="font-size:.7rem;font-weight:700;color:{{ $di['warna'] }};">{{ $di['progress'] }}%</span>
+            </div>
+            <div style="background:rgba(139,94,60,.1);border-radius:99px;height:6px;overflow:hidden;">
+                <div style="height:100%;border-radius:99px;background:{{ $di['warna'] }};width:{{ $di['progress'] }}%;transition:width .5s ease;"></div>
+            </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;">
+            <div>
+                <p style="font-size:.65rem;color:var(--textlt);">Total Petak</p>
+                <p style="font-size:.9rem;font-weight:700;color:var(--soil);">{{ $di['total_petak'] }} petak</p>
+            </div>
+            <div>
+                <p style="font-size:.65rem;color:var(--textlt);">Total Luas</p>
+                <p style="font-size:.9rem;font-weight:700;color:var(--water);">{{ number_format($di['total_luas'], 1) }} ha</p>
+            </div>
+        </div>
+    </div>
+    @endforeach
+</div>
+@else
+<p style="font-size:.82rem;color:var(--textlt);text-align:center;padding:1rem 0;">Belum ada Daerah Irigasi aktif dengan petak terdaftar.</p>
+@endif
+</div>
+@else
+<div class="card" style="padding:1.75rem;margin-bottom:1.75rem;text-align:center;">
+    <p style="font-size:1.5rem;margin-bottom:.5rem;">🌱</p>
+    <p style="font-family:'Fraunces',serif;font-size:1rem;font-weight:600;color:var(--soil);margin-bottom:.25rem;">Tidak ada musim tanam aktif</p>
+    <p style="font-size:.82rem;color:var(--textlt);">Buat musim tanam baru di menu <a href="{{ route('musim-tanam.index') }}" style="color:var(--water);font-weight:600;">Musim Tanam</a>.</p>
+</div>
+@endif
+
 {{-- Tabel --}}
 <div id="table-wrapper" class="card" style="overflow:hidden;">
     @include('irrigation.partials.table', ['tableData' => $tableData])
@@ -324,41 +408,50 @@ document.addEventListener('click', function(e) {
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    const petakData = @json($petaksPeta);
+    const diData = @json($daerahIrigasiPeta);
 
     const miniMap = L.map('mini-map', { zoomControl: true, scrollWheelZoom: false });
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap'
     }).addTo(miniMap);
 
-    if (petakData.length > 0) {
-        const markers = [];
-        petakData.forEach(function(p) {
-            const marker = L.circleMarker([p.lat, p.lng], {
-                radius: 10,
-                fillColor: p.warna,
-                color: '#fff',
-                weight: 2,
-                opacity: 1,
-                fillOpacity: 0.85
+    if (diData.length > 0) {
+        const layers = [];
+        diData.forEach(function(di) {
+            if (!di.geojson) return;
+
+            const geojsonFeature = {
+                type: 'Feature',
+                geometry: di.geojson,
+                properties: di
+            };
+
+            const layer = L.geoJSON(geojsonFeature, {
+                style: {
+                    fillColor: di.warna,
+                    fillOpacity: 0.5,
+                    color: di.warna,
+                    weight: 2,
+                    opacity: 0.8,
+                }
             }).addTo(miniMap);
 
-            marker.bindPopup(`
-                <div style="font-family:'Karla',sans-serif;min-width:160px;">
-                    <p style="font-weight:700;font-size:.9rem;margin-bottom:.25rem;">${p.nama}</p>
-                    <p style="font-size:.75rem;color:#7a6355;margin-bottom:.2rem;">Kode: <strong>${p.kode}</strong></p>
-                    <p style="font-size:.75rem;color:#7a6355;margin-bottom:.2rem;">Luas: <strong>${p.luas} ha</strong></p>
-                    <p style="font-size:.75rem;">Status RTT: <strong style="color:${p.warna}">${p.status}</strong></p>
+            layer.bindPopup(`
+                <div style="font-family:'Karla',sans-serif;min-width:180px;">
+                    <p style="font-weight:700;font-size:.9rem;margin-bottom:.25rem;">${di.nama}</p>
+                    <p style="font-size:.75rem;color:#7a6355;margin-bottom:.2rem;">Kode: <strong>${di.kode}</strong></p>
+                    <p style="font-size:.75rem;color:#7a6355;margin-bottom:.2rem;">Luas: <strong>${di.luas} ha</strong></p>
+                    <p style="font-size:.75rem;">Status RTT: <strong style="color:${di.warna}">${di.status}</strong></p>
                 </div>
             `);
-            markers.push(marker);
+
+            layers.push(layer);
         });
 
-        // Auto-fit ke semua marker
-        const group = L.featureGroup(markers);
+        // Auto-fit ke semua polygon
+        const group = L.featureGroup(layers);
         miniMap.fitBounds(group.getBounds().pad(0.2));
     } else {
-        // Default view kalau belum ada petak dengan koordinat
         miniMap.setView([-2.5489, 115.7624], 9);
     }
 </script>

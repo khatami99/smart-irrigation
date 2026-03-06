@@ -27,6 +27,11 @@ class MusimTanam extends Model
         'tanggal_selesai' => 'date',
     ];
 
+    public function rtt()
+    {
+        return $this->hasMany(Rtt::class);
+    }
+
     // Durasi dalam hari
     public function getDurasiHariAttribute(): int
     {

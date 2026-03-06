@@ -18,37 +18,48 @@ class RttController extends Controller
         $mtId        = $request->get('musim_tanam_id', $mtAktif?->id);
         $mt          = $mtId ? MusimTanam::find($mtId) : $mtAktif;
 
-        $rtts = Rtt::with(['petak', 'musimTanam'])
-            ->when($mtId, fn($q) => $q->where('musim_tanam_id', $mtId))
-            ->orderBy('urutan_rotasi')
-            ->get();
+        // Data per DI
+        $daerahIrigasis = \App\Models\DaerahIrigasi::with([
+            'petaks.rtt' => function($q) use ($mtId) {
+                if ($mtId) $q->where('musim_tanam_id', $mtId);
+            }
+        ])
+        ->where('status', 'aktif')
+        ->get()
+        ->map(function($di) use ($mtId) {
+            $rtts = $di->petaks->flatMap->rtt;
+            $statusRtt = $di->getStatusRttAttribute($mtId);
+            $warna = match($statusRtt) {
+                'berjalan'  => '#4a7c6f',
+                'terlambat' => '#b94a3c',
+                'rencana'   => '#c4895a',
+                'selesai'   => '#5a7a47',
+                default     => '#7a6355',
+            };
+            return [
+                'id'          => $di->id,
+                'nama'        => $di->nama,
+                'kode'        => $di->kode,
+                'total_petak' => $di->petaks->count(),
+                'total_luas'  => $di->petaks->sum('luas_area'),
+                'status'      => $statusRtt,
+                'warna'       => $warna,
+                'progress'    => $rtts->count() > 0 ? (int) round($rtts->avg(fn($r) => $r->progress)) : 0,
+                'rencana'     => $rtts->where('status', 'rencana')->count(),
+                'berjalan'    => $rtts->where('status', 'berjalan')->count(),
+                'selesai'     => $rtts->where('status', 'selesai')->count(),
+                'terlambat'   => $rtts->where('status', 'terlambat')->count(),
+                'target_luas' => $rtts->sum('target_luas'),
+            ];
+        });
 
-        // Data untuk Gantt chart
-        $ganttData = $rtts->map(fn($r) => [
-            'id'            => $r->id,
-            'petak'         => $r->petak->kode_petak,
-            'nama_petak'    => $r->petak->nama_petak,
-            'mulai'         => $r->rencana_mulai_tanam->format('Y-m-d'),
-            'selesai'       => $r->rencana_selesai_tanam->format('Y-m-d'),
-            'mulai_real'    => $r->realisasi_mulai_tanam?->format('Y-m-d'),
-            'selesai_real'  => $r->realisasi_selesai_tanam?->format('Y-m-d'),
-            'status'        => $r->status,
-            'progress'      => $r->progress,
-            'urutan_rotasi' => $r->urutan_rotasi,
-            'jadwal_fase'   => $r->jadwal_fase ?? [],
-        ])->values()->toArray();
+        // Petak yang belum di-assign ke DI
+        $petakTanpaDI = \App\Models\Petak::whereNull('daerah_irigasi_id')
+            ->aktif()
+            ->whereHas('rtt', fn($q) => $mtId ? $q->where('musim_tanam_id', $mtId) : $q)
+            ->count();
 
-        // Summary stats
-        $stats = [
-            'total'       => $rtts->count(),
-            'rencana'     => $rtts->where('status', 'rencana')->count(),
-            'berjalan'    => $rtts->where('status', 'berjalan')->count(),
-            'selesai'     => $rtts->where('status', 'selesai')->count(),
-            'target_luas' => $rtts->sum('target_luas'),
-            'real_luas'   => $rtts->sum('realisasi_luas'),
-        ];
-
-        return view('rtt.index', compact('rtts', 'musimTanams', 'mt', 'mtId', 'ganttData', 'stats'));
+        return view('rtt.index', compact('musimTanams', 'mt', 'mtId', 'daerahIrigasis', 'petakTanpaDI'));
     }
 
     public function create()
@@ -144,5 +155,47 @@ class RttController extends Controller
         $rtt->delete();
         return redirect()->route('rtt.index')
             ->with('success', 'RTT berhasil dihapus.');
+    }
+
+    public function showByDI(Request $request, \App\Models\DaerahIrigasi $daerahIrigasi)
+    {
+        $musimTanams = MusimTanam::orderBy('tanggal_mulai', 'desc')->get();
+        $mtAktif     = MusimTanam::berjalan()->first();
+        $mtId        = $request->get('musim_tanam_id', $mtAktif?->id);
+        $mt          = $mtId ? MusimTanam::find($mtId) : $mtAktif;
+
+        $rtts = Rtt::with(['petak', 'musimTanam'])
+            ->whereHas('petak', fn($q) => $q->where('daerah_irigasi_id', $daerahIrigasi->id))
+            ->when($mtId, fn($q) => $q->where('musim_tanam_id', $mtId))
+            ->orderBy('urutan_rotasi')
+            ->get();
+
+        $ganttData = $rtts->map(fn($r) => [
+            'id'            => $r->id,
+            'petak'         => $r->petak->kode_petak,
+            'nama_petak'    => $r->petak->nama_petak,
+            'mulai'         => $r->rencana_mulai_tanam->format('Y-m-d'),
+            'selesai'       => $r->rencana_selesai_tanam->format('Y-m-d'),
+            'mulai_real'    => $r->realisasi_mulai_tanam?->format('Y-m-d'),
+            'selesai_real'  => $r->realisasi_selesai_tanam?->format('Y-m-d'),
+            'status'        => $r->status,
+            'progress'      => $r->progress,
+            'urutan_rotasi' => $r->urutan_rotasi,
+            'jadwal_fase'   => $r->jadwal_fase ?? [],
+        ])->values()->toArray();
+
+        $stats = [
+            'total'       => $rtts->count(),
+            'rencana'     => $rtts->where('status', 'rencana')->count(),
+            'berjalan'    => $rtts->where('status', 'berjalan')->count(),
+            'selesai'     => $rtts->where('status', 'selesai')->count(),
+            'terlambat'   => $rtts->where('status', 'terlambat')->count(),
+            'target_luas' => $rtts->sum('target_luas'),
+            'real_luas'   => $rtts->sum('realisasi_luas'),
+        ];
+
+        return view('rtt.show-di', compact(
+            'daerahIrigasi', 'rtts', 'musimTanams', 'mt', 'mtId', 'ganttData', 'stats'
+        ));
     }
 }
