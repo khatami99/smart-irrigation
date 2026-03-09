@@ -60,6 +60,7 @@
                 <tr>
                     <th style="text-align:left;">Kode</th>
                     <th style="text-align:left;">Nama</th>
+                    <th style="text-align:center;">Jenis</th>
                     <th style="text-align:center;">Luas (ha)</th>
                     <th style="text-align:left;">Sumber Air</th>
                     <th style="text-align:left;">Penanggung Jawab</th>
@@ -75,6 +76,17 @@
                 <tr>
                     <td><span style="font-family:'Courier New',monospace;font-size:.82rem;font-weight:700;color:var(--soil);background:var(--cream2);padding:.2rem .6rem;border-radius:5px;">{{ $item->kode }}</span></td>
                     <td style="font-weight:600;color:var(--soil);font-family:'Fraunces',serif;">{{ $item->nama }}</td>
+                    <td style="text-align:center;">
+                        @if($item->jenis === 'permukaan')
+                            <span style="display:inline-block;font-size:.72rem;font-weight:700;padding:.2rem .65rem;border-radius:20px;background:rgba(74,124,111,.12);color:var(--water);border:1px solid rgba(74,124,111,.25);">
+                                Permukaan
+                            </span>
+                        @else
+                            <span style="display:inline-block;font-size:.72rem;font-weight:700;padding:.2rem .65rem;border-radius:20px;background:rgba(90,122,71,.12);color:var(--leaf);border:1px solid rgba(90,122,71,.25);">
+                                Rawa
+                            </span>
+                        @endif
+                    </td>
                     <td style="text-align:center;font-weight:600;color:var(--water);">{{ $item->luas_total ? number_format($item->luas_total, 2) : '—' }}</td>
                     <td>{{ $item->sumber_air ?? '—' }}</td>
                     <td>{{ $item->penanggung_jawab ?? '—' }}</td>

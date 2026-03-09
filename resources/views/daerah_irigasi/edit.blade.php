@@ -30,71 +30,7 @@
         <form method="POST" action="{{ route('daerah_irigasi.update', $daerahIrigasi) }}">
             @csrf @method('PUT')
 
-            <div style="display:grid;grid-template-columns:1fr 2fr;gap:1rem;">
-                <div class="form-group">
-                    <label class="form-label">Kode <span style="color:#a03828;">*</span></label>
-                    <input type="text" name="kode" class="form-control" value="{{ old('kode', $daerahIrigasi->kode) }}">
-                    @error('kode')<p class="form-error">{{ $message }}</p>@enderror
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Nama Daerah Irigasi <span style="color:#a03828;">*</span></label>
-                    <input type="text" name="nama" class="form-control" value="{{ old('nama', $daerahIrigasi->nama) }}">
-                    @error('nama')<p class="form-error">{{ $message }}</p>@enderror
-                </div>
-            </div>
-
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
-                <div class="form-group">
-                    <label class="form-label">Luas Total (ha)</label>
-                    <input type="number" name="luas_total" class="form-control" value="{{ old('luas_total', $daerahIrigasi->luas_total) }}" step="0.01" min="0">
-                    @error('luas_total')<p class="form-error">{{ $message }}</p>@enderror
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Sumber Air</label>
-                    <input type="text" name="sumber_air" class="form-control" value="{{ old('sumber_air', $daerahIrigasi->sumber_air) }}">
-                    @error('sumber_air')<p class="form-error">{{ $message }}</p>@enderror
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Penanggung Jawab</label>
-                <input type="text" name="penanggung_jawab" class="form-control" value="{{ old('penanggung_jawab', $daerahIrigasi->penanggung_jawab) }}">
-                @error('penanggung_jawab')<p class="form-error">{{ $message }}</p>@enderror
-            </div>
-
-            {{-- Koordinat --}}
-            <div style="background:var(--cream2);border:1px solid var(--border);border-radius:10px;padding:1.25rem;margin-bottom:1.25rem;">
-                <p style="font-size:.75rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--textlt);margin-bottom:1rem;">📍 Koordinat (Opsional)</p>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
-                    <div class="form-group" style="margin-bottom:0;">
-                        <label class="form-label">Latitude</label>
-                        <input type="number" name="latitude" id="latitude" class="form-control" value="{{ old('latitude', $daerahIrigasi->latitude) }}" step="any">
-                        @error('latitude')<p class="form-error">{{ $message }}</p>@enderror
-                    </div>
-                    <div class="form-group" style="margin-bottom:0;">
-                        <label class="form-label">Longitude</label>
-                        <input type="number" name="longitude" id="longitude" class="form-control" value="{{ old('longitude', $daerahIrigasi->longitude) }}" step="any">
-                        @error('longitude')<p class="form-error">{{ $message }}</p>@enderror
-                    </div>
-                </div>
-                <p class="form-hint" style="margin-top:.75rem;">Klik peta untuk mengubah koordinat.</p>
-                <div id="map-picker" style="height:220px;border-radius:8px;margin-top:.75rem;border:1px solid var(--border);"></div>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Status <span style="color:#a03828;">*</span></label>
-                <select name="status" class="form-select">
-                    <option value="aktif" {{ old('status', $daerahIrigasi->status) === 'aktif' ? 'selected' : '' }}>Aktif</option>
-                    <option value="nonaktif" {{ old('status', $daerahIrigasi->status) === 'nonaktif' ? 'selected' : '' }}>Non-aktif</option>
-                </select>
-                @error('status')<p class="form-error">{{ $message }}</p>@enderror
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Keterangan</label>
-                <textarea name="keterangan" class="form-control" rows="3">{{ old('keterangan', $daerahIrigasi->keterangan) }}</textarea>
-                @error('keterangan')<p class="form-error">{{ $message }}</p>@enderror
-            </div>
+            @include('daerah_irigasi._form')  {{-- ← semua field ada di sini --}}
 
             <div style="display:flex;gap:.75rem;margin-top:1.5rem;">
                 <button type="submit"

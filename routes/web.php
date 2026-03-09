@@ -12,6 +12,7 @@ use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\PetaController;
 use App\Http\Controllers\DaerahIrigasiController;
 use App\Http\Controllers\SaluranController;
+use App\Http\Controllers\BlangkoO01Controller;
 
 Route::get('/', function () {
     $latest = \App\Models\IrrigationData::orderBy('tanggal', 'desc')->first();
@@ -56,6 +57,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/grafik/data', [GrafikController::class, 'data'])->name('grafik.data');
     Route::get('/rtt/daerah-irigasi/{daerahIrigasi}', [RttController::class, 'showByDI'])->name('rtt.by-di');
     Route::resource('rtt', RttController::class)->except(['show']);
+    Route::resource('blangko-o01', BlangkoO01Controller::class);
 
     // Laporan
     Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
