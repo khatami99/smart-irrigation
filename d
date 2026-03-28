@@ -10,7 +10,7 @@ use App\Models\MusimTanam;
 
 class IrrigationController extends Controller
 {
-     public function index()
+    public function index()
     {
         // ── Prediksi AI ─────────────────────────────────────────
         $pythonPath = base_path('predict.py');
@@ -164,17 +164,14 @@ class IrrigationController extends Controller
             'kelembaban'       => 'required|numeric|min:0|max:100',
             'kecepatan_angin'  => 'required|numeric|min:0',
             'radiasi_matahari' => 'required|numeric|min:0',
+            'kc'               => 'required|numeric|min:0|max:2',
             'curah_hujan'      => 'required|numeric|min:0',
         ], [
             'tanggal.unique' => 'Data untuk tanggal ini sudah ada.',
         ]);
 
-        $eto          = IrrigationDataService::hitungETo(
-            $request->suhu_max, $request->suhu_min,
-            $request->kelembaban, $request->kecepatan_angin,
-            $request->radiasi_matahari
-        );
-        $etc          = IrrigationDataService::hitungETc($eto, 1.0); // Kc default, KpSatuService yang hitung per fase
+        $eto          = IrrigationDataService::hitungETo($request->suhu_max, $request->suhu_min, $request->kelembaban, $request->kecepatan_angin, $request->radiasi_matahari);
+        $etc          = IrrigationDataService::hitungETc($eto, $request->kc);
         $kebutuhanAir = IrrigationDataService::hitungKebutuhanAir($etc, $request->curah_hujan);
 
         IrrigationData::create([
@@ -184,15 +181,14 @@ class IrrigationController extends Controller
             'kelembaban'       => $request->kelembaban,
             'kecepatan_angin'  => $request->kecepatan_angin,
             'radiasi_matahari' => $request->radiasi_matahari,
-            'kc'               => 1.0,
+            'kc'               => $request->kc,
             'curah_hujan'      => $request->curah_hujan,
             'eto'              => $eto,
             'etc'              => $etc,
             'kebutuhan_air'    => $kebutuhanAir,
         ]);
 
-        return redirect()->route('irrigation.index')
-            ->with('success', 'Data iklim berhasil disimpan.');
+        return redirect()->route('irrigation.index')->with('success', 'Data berhasil ditambahkan!');
     }
 
     public function edit(IrrigationData $irrigationData)
@@ -209,17 +205,14 @@ class IrrigationController extends Controller
             'kelembaban'       => 'required|numeric|min:0|max:100',
             'kecepatan_angin'  => 'required|numeric|min:0',
             'radiasi_matahari' => 'required|numeric|min:0',
+            'kc'               => 'required|numeric|min:0|max:2',
             'curah_hujan'      => 'required|numeric|min:0',
         ], [
             'tanggal.unique' => 'Data untuk tanggal ini sudah ada.',
         ]);
 
-        $eto          = IrrigationDataService::hitungETo(
-            $request->suhu_max, $request->suhu_min,
-            $request->kelembaban, $request->kecepatan_angin,
-            $request->radiasi_matahari
-        );
-        $etc          = IrrigationDataService::hitungETc($eto, 1.0);
+        $eto          = IrrigationDataService::hitungETo($request->suhu_max, $request->suhu_min, $request->kelembaban, $request->kecepatan_angin, $request->radiasi_matahari);
+        $etc          = IrrigationDataService::hitungETc($eto, $request->kc);
         $kebutuhanAir = IrrigationDataService::hitungKebutuhanAir($etc, $request->curah_hujan);
 
         $irrigationData->update([
@@ -229,158 +222,19 @@ class IrrigationController extends Controller
             'kelembaban'       => $request->kelembaban,
             'kecepatan_angin'  => $request->kecepatan_angin,
             'radiasi_matahari' => $request->radiasi_matahari,
-            'kc'               => 1.0,
+            'kc'               => $request->kc,
             'curah_hujan'      => $request->curah_hujan,
             'eto'              => $eto,
             'etc'              => $etc,
             'kebutuhan_air'    => $kebutuhanAir,
         ]);
 
-        return redirect()->route('irrigation.index')
-            ->with('success', 'Data iklim berhasil diperbarui.');
+        return redirect()->route('irrigation.index')->with('success', 'Data berhasil diperbarui!');
     }
 
     public function destroy(IrrigationData $irrigationData)
     {
         $irrigationData->delete();
-        return redirect()->route('irrigation.index')
-            ->with('success', 'Data iklim berhasil dihapus.');
-    }
-
-    // ── CSV Import ──────────────────────────────────────────────
-    public function importForm()
-    {
-        return view('irrigation.import');
-    }
-
-    public function importCsv(Request $request)
-    {
-        $request->validate([
-            'file_csv' => 'required|file|mimes:csv,txt|max:2048',
-        ], [
-            'file_csv.required' => 'File CSV wajib dipilih.',
-            'file_csv.mimes'    => 'File harus berformat CSV.',
-            'file_csv.max'      => 'Ukuran file maksimal 2MB.',
-        ]);
-
-        $file  = $request->file('file_csv');
-        $lines = file($file->getRealPath(), FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-
-        if (count($lines) < 2) {
-            return back()->withErrors(['file_csv' => 'File CSV kosong atau tidak valid.']);
-        }
-
-        // Deteksi separator (comma atau semicolon)
-        $separator = str_contains($lines[0], ';') ? ';' : ',';
-        $header    = str_getcsv(array_shift($lines), $separator);
-        $header    = array_map('trim', array_map('strtolower', $header));
-
-        // Mapping kolom BMKG → field kita
-        $kolom = [
-            'tanggal'          => $this->cariKolom($header, ['tanggal', 'date', 'tn']),
-            'suhu_max'         => $this->cariKolom($header, ['tx', 'suhu_max', 'tmax', 'suhu max']),
-            'suhu_min'         => $this->cariKolom($header, ['tn', 'suhu_min', 'tmin', 'suhu min']),
-            'kelembaban'       => $this->cariKolom($header, ['rh_avg', 'kelembaban', 'rh', 'humidity']),
-            'kecepatan_angin'  => $this->cariKolom($header, ['ff_avg', 'kecepatan_angin', 'wind', 'ff_x']),
-            'radiasi_matahari' => $this->cariKolom($header, ['ss', 'radiasi', 'radiasi_matahari', 'sunshine']),
-            'curah_hujan'      => $this->cariKolom($header, ['rr', 'curah_hujan', 'rain', 'rainfall', 'ch']),
-        ];
-
-        // Cek kolom wajib
-        $missing = array_filter($kolom, fn($v) => $v === null);
-        if (!empty($missing)) {
-            return back()->withErrors([
-                'file_csv' => 'Kolom tidak ditemukan: ' . implode(', ', array_keys($missing)) . '. Pastikan format CSV sesuai template.'
-            ]);
-        }
-
-        $berhasil = 0;
-        $skip     = 0;
-        $errors   = [];
-
-        foreach ($lines as $i => $line) {
-            $row = str_getcsv($line, $separator);
-            $row = array_map('trim', $row);
-
-            if (count($row) < count($header)) continue;
-
-            $data = [];
-            foreach ($kolom as $field => $idx) {
-                $data[$field] = $row[$idx] ?? null;
-            }
-
-            // Parse tanggal — support berbagai format
-            try {
-                $tanggal = \Carbon\Carbon::parse($data['tanggal'])->format('Y-m-d');
-            } catch (\Exception $e) {
-                $errors[] = "Baris " . ($i + 2) . ": format tanggal tidak valid ({$data['tanggal']})";
-                $skip++;
-                continue;
-            }
-
-            // Skip jika tanggal sudah ada
-            if (IrrigationData::where('tanggal', $tanggal)->exists()) {
-                $skip++;
-                continue;
-            }
-
-            // Konversi nilai — ganti koma desimal ke titik, handle 8888/9999 (kode missing BMKG)
-            $suhuMax  = $this->parseAngka($data['suhu_max']);
-            $suhuMin  = $this->parseAngka($data['suhu_min']);
-            $rh       = $this->parseAngka($data['kelembaban']);
-            $ws       = $this->parseAngka($data['kecepatan_angin']);
-            $rs       = $this->parseAngka($data['radiasi_matahari']);
-            $ch       = $this->parseAngka($data['curah_hujan']) ?? 0;
-
-            // Skip baris dengan data missing kritis
-            if (is_null($suhuMax) || is_null($suhuMin) || is_null($rh) || is_null($ws) || is_null($rs)) {
-                $skip++;
-                continue;
-            }
-
-            $eto          = IrrigationDataService::hitungETo($suhuMax, $suhuMin, $rh, $ws, $rs);
-            $etc          = IrrigationDataService::hitungETc($eto, 1.0);
-            $kebutuhanAir = IrrigationDataService::hitungKebutuhanAir($etc, $ch);
-
-            IrrigationData::create([
-                'tanggal'          => $tanggal,
-                'suhu_max'         => $suhuMax,
-                'suhu_min'         => $suhuMin,
-                'kelembaban'       => $rh,
-                'kecepatan_angin'  => $ws,
-                'radiasi_matahari' => $rs,
-                'kc'               => 1.0,
-                'curah_hujan'      => $ch,
-                'eto'              => $eto,
-                'etc'              => $etc,
-                'kebutuhan_air'    => $kebutuhanAir,
-            ]);
-
-            $berhasil++;
-        }
-
-        $msg = "Import selesai: {$berhasil} data berhasil diimpor.";
-        if ($skip > 0) $msg .= " {$skip} baris dilewati (duplikat/data kosong).";
-
-        return redirect()->route('irrigation.index')->with('success', $msg);
-    }
-
-    // Helper: cari index kolom dari beberapa kemungkinan nama
-    private function cariKolom(array $header, array $candidates): ?int
-    {
-        foreach ($candidates as $name) {
-            $idx = array_search($name, $header);
-            if ($idx !== false) return (int) $idx;
-        }
-        return null;
-    }
-
-    // Helper: parse angka, return null jika missing (8888, 9999, -)
-    private function parseAngka($val): ?float
-    {
-        if (is_null($val) || $val === '' || $val === '-' || $val === '8888' || $val === '9999') {
-            return null;
-        }
-        return (float) str_replace(',', '.', $val);
+        return redirect()->route('irrigation.index')->with('success', 'Data berhasil dihapus!');
     }
 }

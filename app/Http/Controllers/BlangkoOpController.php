@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 use App\Models\BlangkoOp;
 use App\Models\Petak;
 use App\Models\MusimTanam;
+use App\Models\DaerahIrigasi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Routing\Controller as BaseController;
@@ -28,26 +29,26 @@ class BlangkoOpController extends BaseController
             ->orderBy('bulan', 'desc')
             ->orderBy('dekade', 'desc');
 
-        // Filter
         if ($request->filled('petak_id'))      $query->where('petak_id', $request->petak_id);
         if ($request->filled('musim_tanam_id')) $query->where('musim_tanam_id', $request->musim_tanam_id);
         if ($request->filled('tahun'))          $query->where('tahun', $request->tahun);
         if ($request->filled('bulan'))          $query->where('bulan', $request->bulan);
 
-        $blangkos    = $query->paginate(15);
-        $petaks      = Petak::aktif()->orderBy('kode_petak')->get();
-        $musimTanams = MusimTanam::orderBy('tanggal_mulai', 'desc')->get();
-        $years       = BlangkoOp::selectRaw('tahun')->distinct()->orderBy('tahun', 'desc')->pluck('tahun');
+        $blangkos       = $query->paginate(15);
+        $petaks         = Petak::aktif()->orderBy('kode_petak')->get();
+        $musimTanams    = MusimTanam::orderBy('tanggal_mulai', 'desc')->get();
+        $years          = BlangkoOp::selectRaw('tahun')->distinct()->orderBy('tahun', 'desc')->pluck('tahun');
 
         return view('blangko_op.index', compact('blangkos', 'petaks', 'musimTanams', 'years'));
     }
 
     public function create()
     {
-        $petaks      = Petak::aktif()->orderBy('kode_petak')->get();
-        $musimTanams = MusimTanam::orderBy('tanggal_mulai', 'desc')->get();
-        $mtAktif     = MusimTanam::berjalan()->first();
-        return view('blangko_op.create', compact('petaks', 'musimTanams', 'mtAktif'));
+        $daerahIrigasis = DaerahIrigasi::aktif()->orderBy('kode')->get();
+        $musimTanams    = MusimTanam::orderBy('tanggal_mulai', 'desc')->get();
+        $mtAktif        = MusimTanam::berjalan()->first();
+
+        return view('blangko_op.create', compact('daerahIrigasis', 'musimTanams', 'mtAktif'));
     }
 
     public function store(Request $request)
@@ -71,7 +72,6 @@ class BlangkoOpController extends BaseController
             'keterangan'        => 'nullable|string',
         ]);
 
-        // Cek duplikat
         $exists = BlangkoOp::where('petak_id', $request->petak_id)
             ->where('musim_tanam_id', $request->musim_tanam_id)
             ->where('tahun', $request->tahun)
@@ -93,9 +93,10 @@ class BlangkoOpController extends BaseController
 
     public function edit(BlangkoOp $blangkoOp)
     {
-        $petaks      = Petak::aktif()->orderBy('kode_petak')->get();
-        $musimTanams = MusimTanam::orderBy('tanggal_mulai', 'desc')->get();
-        return view('blangko_op.edit', compact('blangkoOp', 'petaks', 'musimTanams'));
+        $daerahIrigasis = DaerahIrigasi::aktif()->orderBy('kode')->get();
+        $musimTanams    = MusimTanam::orderBy('tanggal_mulai', 'desc')->get();
+
+        return view('blangko_op.edit', compact('blangkoOp', 'daerahIrigasis', 'musimTanams'));
     }
 
     public function update(Request $request, BlangkoOp $blangkoOp)

@@ -154,13 +154,8 @@
                 </a>
                 @endcan
 
-                {{-- OPERASIONAL --}}
-                <p style="font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(232,213,163,.3);padding:.5rem .5rem;margin-top:.75rem;margin-bottom:.25rem;">Operasional</p>
-
-                <a href="{{ route('irrigation.index') }}"
-                class="nav-item {{ request()->routeIs('irrigation.index') ? 'active' : '' }}" style="padding-left:1.5rem;">
-                    <span style="font-size:.9rem;margin-right:.65rem;">🗃️</span> Data Iklim
-                </a>
+                {{-- PERENCANAAN --}}
+                <p style="font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(232,213,163,.3);padding:.5rem .5rem;margin-top:.75rem;margin-bottom:.25rem;">Perencanaan</p>
 
                 @can('view musim-tanam')
                 <a href="{{ route('musim-tanam.index') }}"
@@ -170,28 +165,42 @@
                 @endcan
 
                 @can('view blangko-op')
-                <a href="{{ route('blangko-op.index') }}"
-                class="nav-item {{ request()->routeIs('blangko-op.*') ? 'active' : '' }}" style="padding-left:1.5rem;">
-                    <span style="font-size:.9rem;margin-right:.65rem;">📋</span> Blangko OP
-                </a>
-                @endcan
-
-                @can('view blangko-op')
                 <a href="{{ route('blangko-o01.index') }}"
-                class="nav-item {{ request()->routeIs('blangko-o01.*') ? 'active' : '' }}" style="padding-left:2rem;">
-                    <span style="font-size:.85rem;margin-right:.65rem;">📄</span> O-01 Luas Tanam
+                class="nav-item {{ request()->routeIs('blangko-o01.*') ? 'active' : '' }}" style="padding-left:1.5rem;">
+                    <span style="font-size:.9rem;margin-right:.65rem;">🌾</span> Luas Tanam
                 </a>
                 @endcan
 
                 @can('view rtt')
                 <a href="{{ route('rtt.index') }}"
                 class="nav-item {{ request()->routeIs('rtt.*') ? 'active' : '' }}" style="padding-left:1.5rem;">
-                    <span style="font-size:.9rem;margin-right:.65rem;">🗓️</span> RTT
+                    <span style="font-size:.9rem;margin-right:.65rem;">🗓️</span> Jadwal Tanam
+                </a>
+                @endcan
+
+                {{-- OPERASIONAL --}}
+                <p style="font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(232,213,163,.3);padding:.5rem .5rem;margin-top:.75rem;margin-bottom:.25rem;">Operasional</p>
+
+                <a href="{{ route('irrigation.index') }}"
+                class="nav-item {{ request()->routeIs('irrigation.*') ? 'active' : '' }}" style="padding-left:1.5rem;">
+                    <span style="font-size:.9rem;margin-right:.65rem;">🌤️</span> Data Iklim
+                </a>
+
+                @can('view blangko-op')
+                <a href="{{ route('blangko-op.index') }}"
+                class="nav-item {{ request()->routeIs('blangko-op.*') ? 'active' : '' }}" style="padding-left:1.5rem;">
+                    <span style="font-size:.9rem;margin-right:.65rem;">📋</span> Kondisi Air & Lahan
                 </a>
                 @endcan
 
                 {{-- ANALISIS & LAPORAN --}}
                 <p style="font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(232,213,163,.3);padding:.5rem .5rem;margin-top:.75rem;margin-bottom:.25rem;">Analisis & Laporan</p>
+
+                {{-- Kebutuhan Air - akan aktif setelah modul selesai dibangun --}}
+                <a href="{{ route('kebutuhan-air.index') }}"
+                class="nav-item {{ request()->routeIs('kebutuhan-air.*') ? 'active' : '' }}" style="padding-left:1.5rem;">
+                    <span style="font-size:.9rem;margin-right:.65rem;">💧</span> Kebutuhan Air
+                </a>
 
                 <a href="{{ route('grafik.index') }}"
                 class="nav-item {{ request()->routeIs('grafik.*') ? 'active' : '' }}" style="padding-left:1.5rem;">

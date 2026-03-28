@@ -65,6 +65,15 @@ class DaerahIrigasiController extends BaseController
             ->with('success', 'Daerah irigasi berhasil dihapus.');
     }
 
+    public function getPetaksByDI(DaerahIrigasi $daerahIrigasi)
+    {
+        $petaks = $daerahIrigasi->petaks()
+            ->orderBy('kode_petak')
+            ->get(['id', 'kode_petak', 'nama_petak']);
+
+        return response()->json($petaks);
+    }
+
     // ─── Validation rules ───────────────────────────────
     private function rules(?int $id = null): array
     {

@@ -24,16 +24,17 @@
         <p style="font-size:.82rem;color:var(--textlt);margin-top:.2rem;">Suhu, kelembaban, radiasi, dan kebutuhan air per hari</p>
     </div>
     @can('create data-iklim')
-    <a href="{{ route('irrigation.create') }}"
-       style="background:var(--soil);color:var(--straw);padding:.65rem 1.4rem;border-radius:8px;font-size:.85rem;font-weight:600;text-decoration:none;"
-       onmouseover="this.style.background='var(--soil2)'" onmouseout="this.style.background='var(--soil)'">
-        + Tambah Data
+    <a href="{{ route('irrigation.import') }}" style="padding:.6rem 1.25rem;background:rgba(74,124,111,.1);color:var(--water);border:1px solid rgba(74,124,111,.25);border-radius:8px;font-size:.82rem;font-weight:600;text-decoration:none;">
+        📂 Import CSV
+    </a>
+    <a href="{{ route('irrigation.create') }}" style="padding:.6rem 1.25rem;background:var(--water);color:white;border:none;border-radius:8px;font-size:.82rem;font-weight:600;text-decoration:none;">
+        + Tambah Manual
     </a>
     @endcan
 </div>
 
 @if(session('success'))
-<div style="background:rgba(90,122,71,.1);border:1px solid rgba(90,122,71,.2);color:var(--leaf);border-radius:8px;padding:.8rem 1rem;font-size:.85rem;margin-bottom:1.25rem;">
+<div style="background:rgba(43, 44, 43, 0.1);border:1px solid rgba(90,122,71,.2);color:var(--leaf);border-radius:8px;padding:.8rem 1rem;font-size:.85rem;margin-bottom:1.25rem;">
     {{ session('success') }}
 </div>
 @endif

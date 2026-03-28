@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\BlangkoO01;
 use App\Models\DaerahIrigasi;
 use App\Models\MusimTanam;
+use App\Services\KpSatuService;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -29,25 +30,15 @@ class BlangkoO01Controller extends Controller
         $query = BlangkoO01::with(['daerahIrigasi', 'musimTanam', 'user'])
             ->orderBy('created_at', 'desc');
 
-        if ($mtId) {
-            $query->where('musim_tanam_id', $mtId);
-        }
-
-        if ($request->filled('daerah_irigasi_id')) {
-            $query->where('daerah_irigasi_id', $request->daerah_irigasi_id);
-        }
-
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
+        if ($mtId) $query->where('musim_tanam_id', $mtId);
+        if ($request->filled('daerah_irigasi_id')) $query->where('daerah_irigasi_id', $request->daerah_irigasi_id);
+        if ($request->filled('status')) $query->where('status', $request->status);
 
         $items          = $query->paginate(15);
         $daerahIrigasis = DaerahIrigasi::aktif()->orderBy('kode')->get();
         $mt             = $mtId ? MusimTanam::find($mtId) : $mtAktif;
 
-        return view('blangko_o01.index', compact(
-            'items', 'musimTanams', 'daerahIrigasis', 'mt', 'mtId'
-        ));
+        return view('blangko_o01.index', compact('items', 'musimTanams', 'daerahIrigasis', 'mt', 'mtId'));
     }
 
     public function create(Request $request)
@@ -74,7 +65,7 @@ class BlangkoO01Controller extends Controller
             'keterangan'           => 'nullable|string',
         ]);
 
-        $di = DaerahIrigasi::find($request->daerah_irigasi_id);
+        $di          = DaerahIrigasi::find($request->daerah_irigasi_id);
         $totalUsulan = $request->luas_padi_usulan + $request->luas_palawija_usulan + $request->luas_tebu_usulan;
 
         if ($di->luas_total && $totalUsulan > $di->luas_total) {
@@ -83,7 +74,6 @@ class BlangkoO01Controller extends Controller
             ]);
         }
 
-        // Cek duplikat
         $exists = BlangkoO01::where('daerah_irigasi_id', $request->daerah_irigasi_id)
             ->where('musim_tanam_id', $request->musim_tanam_id)
             ->exists();
@@ -94,7 +84,7 @@ class BlangkoO01Controller extends Controller
             ]);
         }
 
-        BlangkoO01::create(array_merge($request->only([
+        $o01 = BlangkoO01::create(array_merge($request->only([
             'daerah_irigasi_id',
             'musim_tanam_id',
             'luas_padi_usulan',
@@ -106,8 +96,11 @@ class BlangkoO01Controller extends Controller
             'status'  => 'usulan',
         ]));
 
+        // ── Trigger kalkulasi KP-01 ──────────────────────
+        app(KpSatuService::class)->hitungDariO01($o01);
+
         return redirect()->route('blangko-o01.index')
-            ->with('success', 'Blangko O-01 berhasil disimpan.');
+            ->with('success', 'Blangko O-01 berhasil disimpan. Kebutuhan air telah dihitung.');
     }
 
     public function show(BlangkoO01 $blangkoO01)
@@ -125,7 +118,9 @@ class BlangkoO01Controller extends Controller
 
     public function update(Request $request, BlangkoO01 $blangkoO01)
     {
-        $isAdmin = Auth::user()->can('delete blangko-op');
+        /** @var \App\Models\User $user */
+        $user    = Auth::user();
+        $isAdmin = $user->can('delete blangko-op');
 
         $rules = [
             'luas_padi_usulan'     => 'required|numeric|min:0',
@@ -134,7 +129,6 @@ class BlangkoO01Controller extends Controller
             'keterangan'           => 'nullable|string',
         ];
 
-        // Hanya admin/dinas yang bisa set luas disetujui & status
         if ($isAdmin) {
             $rules['luas_padi_disetujui']     = 'nullable|numeric|min:0';
             $rules['luas_palawija_disetujui'] = 'nullable|numeric|min:0';
@@ -144,7 +138,7 @@ class BlangkoO01Controller extends Controller
 
         $request->validate($rules);
 
-        $di = $blangkoO01->daerahIrigasi;
+        $di          = $blangkoO01->daerahIrigasi;
         $totalUsulan = $request->luas_padi_usulan + $request->luas_palawija_usulan + $request->luas_tebu_usulan;
 
         if ($di->luas_total && $totalUsulan > $di->luas_total) {
@@ -171,8 +165,11 @@ class BlangkoO01Controller extends Controller
 
         $blangkoO01->update($data);
 
+        // ── Trigger recalculate KP-01 ────────────────────
+        app(KpSatuService::class)->hitungDariO01($blangkoO01->fresh());
+
         return redirect()->route('blangko-o01.index')
-            ->with('success', 'Blangko O-01 berhasil diperbarui.');
+            ->with('success', 'Blangko O-01 berhasil diperbarui. Kebutuhan air telah dihitung ulang.');
     }
 
     public function destroy(BlangkoO01 $blangkoO01)

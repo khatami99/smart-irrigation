@@ -1,6 +1,6 @@
 @extends('layouts.app')
-@section('title', 'Input Blangko OP — Smart Irrigation')
-@section('page-title', 'Input Blangko OP')
+@section('title', 'Input Kondisi Air & Lahan — Smart Irrigation')
+@section('page-title', 'Input Kondisi Air & Lahan')
 
 @section('content')
 <style>
@@ -10,6 +10,7 @@
     .form-label span { font-weight:300;color:var(--textlt); }
     .form-input { width:100%;background:var(--cream);border:1.5px solid rgba(139,94,60,.18);color:var(--text);border-radius:8px;padding:.75rem 1rem;font-size:.875rem;font-family:'Karla',sans-serif;transition:border-color .2s,box-shadow .2s;outline:none; }
     .form-input:focus { border-color:var(--water);box-shadow:0 0 0 3px rgba(74,124,111,.1); }
+    .form-input:disabled { opacity:.5;cursor:not-allowed; }
     .form-input::placeholder { color:rgba(122,99,85,.35); }
     .section-label { font-size:.65rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--textlt);margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1px solid rgba(139,94,60,.1); }
     .btn-primary { background:var(--soil);color:var(--straw);padding:.8rem 2rem;border-radius:8px;border:none;font-family:'Karla',sans-serif;font-size:.9rem;font-weight:600;cursor:pointer;transition:background .2s; }
@@ -30,18 +31,20 @@
     .kondisi-option.baik input:checked         + label { background:rgba(90,122,71,.1);border-color:var(--leaf);color:var(--leaf); }
     .kondisi-option.rusak_ringan input:checked + label { background:rgba(196,137,90,.1);border-color:var(--clay);color:var(--clay); }
     .kondisi-option.rusak_berat input:checked  + label { background:rgba(185,74,60,.08);border-color:#a03828;color:#a03828; }
+    .di-info-box { margin-top:.6rem;padding:.5rem .9rem;background:rgba(74,124,111,.06);border:1px solid rgba(74,124,111,.15);border-radius:8px;font-size:.8rem;color:var(--textlt);display:none; }
+    .petak-loading { font-size:.78rem;color:var(--textlt);padding:.5rem;display:none; }
 </style>
 
 <div style="max-width:700px;margin:0 auto;">
     <a href="{{ route('blangko-op.index') }}" style="display:inline-flex;align-items:center;gap:.4rem;font-size:.82rem;color:var(--textlt);text-decoration:none;margin-bottom:1.25rem;"
        onmouseover="this.style.color='var(--water)'" onmouseout="this.style.color='var(--textlt)'">
-        ← Kembali ke Daftar Blangko OP
+        ← Kembali ke Kondisi Air & Lahan
     </a>
 
     <div class="form-card">
         <div style="margin-bottom:1.75rem;">
             <p style="font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--textlt);margin-bottom:.3rem;">Form Input</p>
-            <h2 style="font-family:'Fraunces',serif;font-size:1.5rem;font-weight:700;color:var(--soil);letter-spacing:-.02em;">Blangko OP Per Dekade</h2>
+            <h2 style="font-family:'Fraunces',serif;font-size:1.5rem;font-weight:700;color:var(--soil);letter-spacing:-.02em;">Kondisi Air & Lahan Per Dekade</h2>
             <p style="font-size:.85rem;color:var(--textlt);font-weight:300;margin-top:.25rem;">Catatan pengamatan lapangan per 10 harian.</p>
         </div>
 
@@ -57,17 +60,25 @@
             {{-- Identitas --}}
             <div style="margin-bottom:1.5rem;">
                 <p class="section-label">📍 Identitas Catatan</p>
+
+                {{-- Baris 1: DI & MT --}}
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
                     <div>
-                        <label class="form-label">Petak <span>*</span></label>
-                        <select name="petak_id" required class="form-input">
-                            <option value="">— Pilih Petak —</option>
-                            @foreach($petaks as $petak)
-                                <option value="{{ $petak->id }}" {{ old('petak_id') == $petak->id ? 'selected' : '' }}>
-                                    {{ $petak->kode_petak }} — {{ $petak->nama_petak }}
+                        <label class="form-label">Daerah Irigasi <span>*</span></label>
+                        <select id="di-select" class="form-input" onchange="loadPetak(this.value)">
+                            <option value="">— Pilih DI —</option>
+                            @foreach($daerahIrigasis as $di)
+                                <option value="{{ $di->id }}"
+                                    data-jenis="{{ $di->jenis_di ?? 'permukaan' }}"
+                                    {{ old('daerah_irigasi_id') == $di->id ? 'selected' : '' }}>
+                                    {{ $di->kode }} — {{ $di->nama }}
                                 </option>
                             @endforeach
                         </select>
+                        {{-- Info DI --}}
+                        <div class="di-info-box" id="di-info">
+                            Jenis: <strong id="di-info-jenis">—</strong>
+                        </div>
                     </div>
                     <div>
                         <label class="form-label">Musim Tanam <span>*</span></label>
@@ -83,6 +94,17 @@
                         </select>
                     </div>
                 </div>
+
+                {{-- Baris 2: Petak (difilter dari DI) --}}
+                <div style="margin-bottom:1rem;">
+                    <label class="form-label">Petak <span>*</span></label>
+                    <select name="petak_id" id="petak-select" required class="form-input" disabled>
+                        <option value="">— Pilih DI terlebih dahulu —</option>
+                    </select>
+                    <p class="petak-loading" id="petak-loading">⏳ Memuat daftar petak...</p>
+                </div>
+
+                {{-- Baris 3: Tahun, Bulan, Dekade --}}
                 <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;">
                     <div>
                         <label class="form-label">Tahun <span>*</span></label>
@@ -100,7 +122,7 @@
                     <div>
                         <label class="form-label">Dekade <span>*</span></label>
                         <select name="dekade" required class="form-input">
-                            <option value="I"   {{ old('dekade') == 'I'   ? 'selected' : '' }}>I &nbsp;— Tgl 1–10</option>
+                            <option value="I"   {{ old('dekade') == 'I'   ? 'selected' : '' }}>I — Tgl 1–10</option>
                             <option value="II"  {{ old('dekade') == 'II'  ? 'selected' : '' }}>II — Tgl 11–20</option>
                             <option value="III" {{ old('dekade') == 'III' ? 'selected' : '' }}>III — Tgl 21–akhir</option>
                         </select>
@@ -233,7 +255,7 @@
             </div>
 
             <div style="display:flex;gap:.75rem;">
-                <button type="submit" class="btn-primary">Simpan Blangko OP</button>
+                <button type="submit" class="btn-primary">Simpan</button>
                 <a href="{{ route('blangko-op.index') }}" class="btn-cancel">Batal</a>
             </div>
         </form>
@@ -243,15 +265,81 @@
 
 @push('scripts')
 <script>
+    // ── Load petak berdasarkan DI yang dipilih ──────────────────────
+    function loadPetak(diId) {
+        const petakSelect  = document.getElementById('petak-select');
+        const petakLoading = document.getElementById('petak-loading');
+        const diInfo       = document.getElementById('di-info');
+        const diInfoJenis  = document.getElementById('di-info-jenis');
+        const diSelect     = document.getElementById('di-select');
+
+        // Reset
+        petakSelect.innerHTML = '<option value="">— Pilih Petak —</option>';
+        petakSelect.disabled  = true;
+        diInfo.style.display  = 'none';
+
+        if (!diId) return;
+
+        // Tampilkan info jenis DI
+        const opt   = diSelect.options[diSelect.selectedIndex];
+        const jenis = opt.dataset.jenis;
+        diInfoJenis.textContent = jenis === 'rawa' ? 'DIR (Rawa)' : 'DIP (Permukaan)';
+        diInfo.style.display    = 'block';
+
+        // Fetch petak
+        petakLoading.style.display = 'block';
+
+        fetch(`/api/daerah-irigasi/${diId}/petaks`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json',
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            petakLoading.style.display = 'none';
+            if (!data.length) {
+                petakSelect.innerHTML = '<option value="">— Tidak ada petak di DI ini —</option>';
+                return;
+            }
+            petakSelect.innerHTML = '<option value="">— Pilih Petak —</option>';
+            data.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value       = p.id;
+                opt.textContent = `${p.kode_petak} — ${p.nama_petak}`;
+                petakSelect.appendChild(opt);
+            });
+            petakSelect.disabled = false;
+
+            // Restore old value jika ada (setelah validasi error)
+            const oldPetak = "{{ old('petak_id') }}";
+            if (oldPetak) petakSelect.value = oldPetak;
+        })
+        .catch(() => {
+            petakLoading.style.display = 'none';
+            petakSelect.innerHTML = '<option value="">— Gagal memuat petak —</option>';
+        });
+    }
+
+    // ── Hitung efisiensi rencana vs realisasi ───────────────────────
     function hitungEfisiensi(jenis) {
-        const r   = parseFloat(document.getElementById(jenis+'-r').value);
-        const a   = parseFloat(document.getElementById(jenis+'-a').value);
-        const el  = document.getElementById('efisiensi-'+jenis);
+        const r  = parseFloat(document.getElementById(jenis+'-r').value);
+        const a  = parseFloat(document.getElementById(jenis+'-a').value);
+        const el = document.getElementById('efisiensi-'+jenis);
         if (isNaN(r) || isNaN(a) || r === 0) { el.textContent = ''; return; }
-        const pct = Math.round((a / r) * 100 * 10) / 10;
+        const pct   = Math.round((a / r) * 100 * 10) / 10;
         const color = pct >= 80 ? 'var(--leaf)' : (pct >= 60 ? 'var(--clay)' : '#a03828');
         el.innerHTML = `<span style="color:${color};font-weight:700;">Efisiensi: ${pct}%</span>
             <span style="color:var(--textlt);"> — ${pct >= 80 ? 'Baik' : (pct >= 60 ? 'Perlu perhatian' : 'Di bawah target')}</span>`;
     }
+
+    // ── Init: restore DI & Petak jika ada old() setelah error ──────
+    document.addEventListener('DOMContentLoaded', function () {
+        const oldDi = "{{ old('daerah_irigasi_id') }}";
+        if (oldDi) {
+            document.getElementById('di-select').value = oldDi;
+            loadPetak(oldDi);
+        }
+    });
 </script>
 @endpush
