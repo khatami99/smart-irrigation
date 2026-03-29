@@ -72,6 +72,19 @@ class IrrigationController extends Controller
         $musimTanams = MusimTanam::orderBy('tanggal_mulai', 'desc')->get();
         $mtAktif     = MusimTanam::where('status', 'berjalan')->first();
 
+        //data KP-01
+        $summaryKp = null;
+        if ($mtAktif) {
+            $summaryKp = [
+                'total_kebutuhan' => \App\Models\KebutuhanAirDi::where('musim_tanam_id', $mtAktif->id)
+                    ->avg('kebutuhan_total'),
+                'jumlah_di'       => \App\Models\DaerahIrigasi::where('status', 'aktif')->count(),
+                'total_luas' => \App\Models\BlangkoO01::where('musim_tanam_id', $mtAktif->id)
+                    ->selectRaw('SUM(luas_padi_usulan + luas_palawija_usulan + luas_tebu_usulan) as total')
+                    ->value('total'),
+                'total_data_iklim' => \App\Models\IrrigationData::count(),
+            ];
+        }
         // ── Data peta mini dashboard (per Daerah Irigasi) ────────
         $mtId = $mtAktif?->id;
         $daerahIrigasiPeta = \App\Models\DaerahIrigasi::with([
@@ -141,6 +154,7 @@ class IrrigationController extends Controller
             'musimTanams', 'mtAktif',
             'daerahIrigasiPeta',
             'diKartu',
+            'summaryKp',
         ));
     }
 

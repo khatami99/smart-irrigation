@@ -14,6 +14,7 @@ use App\Http\Controllers\DaerahIrigasiController;
 use App\Http\Controllers\SaluranController;
 use App\Http\Controllers\BlangkoO01Controller;
 use App\Http\Controllers\KebutuhanAirController;
+use App\Http\Controllers\BlangkoDipController;
 
 Route::get('/', function () {
     $latest = \App\Models\IrrigationData::orderBy('tanggal', 'desc')->first();
@@ -66,6 +67,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/kebutuhan-air', [KebutuhanAirController::class, 'index'])
         ->name('kebutuhan-air.index')
         ->middleware('permission:view blangko-op');
+    Route::get('/blangko-dip/o05', [BlangkoDipController::class, 'o05'])->name('blangko-dip.o05')->middleware('permission:view blangko-op');
+    Route::get('/blangko-dip/o05/pdf', [BlangkoDipController::class, 'o05Pdf'])->name('blangko-dip.o05.pdf')->middleware('permission:view blangko-op');
 
     // Laporan
     Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');

@@ -115,6 +115,57 @@
     </div>
 </div> --}}
 
+{{-- Summary KP-01 --}}
+@if($summaryKp)
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.75rem;">
+
+    <div class="card" style="padding:1.25rem 1.5rem;display:flex;align-items:center;gap:1rem;">
+        <div style="width:42px;height:42px;border-radius:10px;background:rgba(74,124,111,.1);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;">💧</div>
+        <div>
+            <p style="font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--textlt);margin-bottom:.2rem;">Rerata Kebutuhan</p>
+            <p style="font-family:'Fraunces',serif;font-size:1.2rem;font-weight:700;color:var(--water);">
+                {{ number_format($summaryKp['total_kebutuhan'] ?? 0, 1) }} <span style="font-size:.75rem;font-weight:400;color:var(--textlt);">lt/det</span>
+            </p>
+            <p style="font-size:.7rem;color:var(--textlt);">per dekade · MT aktif</p>
+        </div>
+    </div>
+
+    <div class="card" style="padding:1.25rem 1.5rem;display:flex;align-items:center;gap:1rem;">
+        <div style="width:42px;height:42px;border-radius:10px;background:rgba(90,122,71,.1);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;">🏞️</div>
+        <div>
+            <p style="font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--textlt);margin-bottom:.2rem;">Daerah Irigasi</p>
+            <p style="font-family:'Fraunces',serif;font-size:1.2rem;font-weight:700;color:var(--leaf);">
+                {{ $summaryKp['jumlah_di'] }} <span style="font-size:.75rem;font-weight:400;color:var(--textlt);">DI aktif</span>
+            </p>
+            <p style="font-size:.7rem;color:var(--textlt);">terdaftar di sistem</p>
+        </div>
+    </div>
+
+    <div class="card" style="padding:1.25rem 1.5rem;display:flex;align-items:center;gap:1rem;">
+        <div style="width:42px;height:42px;border-radius:10px;background:rgba(196,137,90,.1);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;">🌾</div>
+        <div>
+            <p style="font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--textlt);margin-bottom:.2rem;">Total Luas Tanam</p>
+            <p style="font-family:'Fraunces',serif;font-size:1.2rem;font-weight:700;color:var(--clay);">
+                {{ number_format($summaryKp['total_luas'] ?? 0, 1) }} <span style="font-size:.75rem;font-weight:400;color:var(--textlt);">ha</span>
+            </p>
+            <p style="font-size:.7rem;color:var(--textlt);">usulan O-01 MT aktif</p>
+        </div>
+    </div>
+
+    <div class="card" style="padding:1.25rem 1.5rem;display:flex;align-items:center;gap:1rem;">
+        <div style="width:42px;height:42px;border-radius:10px;background:rgba(61,43,31,.07);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;">📊</div>
+        <div>
+            <p style="font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--textlt);margin-bottom:.2rem;">Data Iklim</p>
+            <p style="font-family:'Fraunces',serif;font-size:1.2rem;font-weight:700;color:var(--soil);">
+                {{ number_format($summaryKp['total_data_iklim']) }} <span style="font-size:.75rem;font-weight:400;color:var(--textlt);">hari</span>
+            </p>
+            <p style="font-size:.7rem;color:var(--textlt);">data iklim tersimpan</p>
+        </div>
+    </div>
+
+</div>
+@endif
+
 {{-- Chart dengan mode toggle --}}
 <div class="card" style="padding:1.75rem;margin-bottom:1.75rem;">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.25rem;flex-wrap:wrap;gap:.75rem;">

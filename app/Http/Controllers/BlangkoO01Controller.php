@@ -38,7 +38,7 @@ class BlangkoO01Controller extends Controller
         $daerahIrigasis = DaerahIrigasi::aktif()->orderBy('kode')->get();
         $mt             = $mtId ? MusimTanam::find($mtId) : $mtAktif;
 
-        return view('blangko_o01.index', compact('items', 'musimTanams', 'daerahIrigasis', 'mt', 'mtId'));
+        return view('blangko_dip.index', compact('items', 'musimTanams', 'daerahIrigasis', 'mt', 'mtId'));
     }
 
     public function create(Request $request)
@@ -49,7 +49,7 @@ class BlangkoO01Controller extends Controller
         $selectedDiId   = $request->get('daerah_irigasi_id');
         $selectedMtId   = $request->get('musim_tanam_id', $mtAktif?->id);
 
-        return view('blangko_o01.create', compact(
+        return view('blangko_dip.create', compact(
             'daerahIrigasis', 'musimTanams', 'mtAktif', 'selectedDiId', 'selectedMtId'
         ));
     }
@@ -106,14 +106,14 @@ class BlangkoO01Controller extends Controller
     public function show(BlangkoO01 $blangkoO01)
     {
         $blangkoO01->load(['daerahIrigasi', 'musimTanam', 'user']);
-        return view('blangko_o01.show', compact('blangkoO01'));
+        return view('blangko_dip.show', compact('blangkoO01'));
     }
 
     public function edit(BlangkoO01 $blangkoO01)
     {
         $daerahIrigasis = DaerahIrigasi::aktif()->orderBy('kode')->get();
         $musimTanams    = MusimTanam::orderBy('tanggal_mulai', 'desc')->get();
-        return view('blangko_o01.edit', compact('blangkoO01', 'daerahIrigasis', 'musimTanams'));
+        return view('blangko_dip.edit', compact('blangkoO01', 'daerahIrigasis', 'musimTanams'));
     }
 
     public function update(Request $request, BlangkoO01 $blangkoO01)
