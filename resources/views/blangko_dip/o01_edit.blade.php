@@ -18,7 +18,7 @@
 </style>
 
 <div style="margin-bottom:1.5rem;">
-    <a href="{{ route('blangko-o01.index') }}" style="font-size:.82rem;color:var(--textlt);text-decoration:none;">← Kembali ke O-01</a>
+    <a href="{{ route('blangko-dip.o01.index') }}" style="font-size:.82rem;color:var(--textlt);text-decoration:none;">← Kembali ke O-01</a>
 </div>
 
 <div style="max-width:760px;">
@@ -36,7 +36,7 @@
     @endif
 
     <div class="card">
-        <form method="POST" action="{{ route('blangko-o01.update', $blangkoO01) }}">
+        <form method="POST" action="{{ route('blangko-dip.o01.update', $blangkoO01) }}">
             @csrf @method('PUT')
 
             {{-- Info readonly --}}
@@ -123,7 +123,7 @@
                     onmouseover="this.style.background='var(--soil2)'" onmouseout="this.style.background='var(--soil)'">
                     Update O-01
                 </button>
-                <a href="{{ route('blangko-o01.index') }}"
+                <a href="{{ route('blangko-dip.o01.index') }}"
                     style="background:rgba(139,94,60,.08);border:1.5px solid var(--border);color:var(--textlt);padding:.65rem 1.25rem;border-radius:8px;font-size:.875rem;font-weight:600;text-decoration:none;">
                     Batal
                 </a>

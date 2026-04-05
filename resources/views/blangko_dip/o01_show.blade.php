@@ -25,7 +25,7 @@
 </style>
 
 <div style="margin-bottom:1.5rem;">
-    <a href="{{ route('blangko-o01.index') }}" style="font-size:.82rem;color:var(--textlt);text-decoration:none;">← Kembali ke O-01</a>
+    <a href="{{ route('blangko-dip.o01.index') }}" style="font-size:.82rem;color:var(--textlt);text-decoration:none;">← Kembali ke O-01</a>
 </div>
 
 <div style="max-width:800px;">
@@ -166,12 +166,12 @@
 
     <div style="display:flex;gap:.75rem;margin-top:1rem;">
         @can('edit blangko-op')
-        <a href="{{ route('blangko-o01.edit', $blangkoO01) }}"
+        <a href="{{ route('blangko-dip.o01.edit', $blangkoO01) }}"
             style="background:var(--soil);color:var(--straw);padding:.65rem 1.5rem;border-radius:8px;font-size:.875rem;font-weight:600;text-decoration:none;">
             Edit O-01
         </a>
         @endcan
-        <a href="{{ route('blangko-o01.index') }}"
+        <a href="{{ route('blangko-dip.o01.index') }}"
             style="background:rgba(139,94,60,.08);border:1.5px solid var(--border);color:var(--textlt);padding:.65rem 1.25rem;border-radius:8px;font-size:.875rem;font-weight:600;text-decoration:none;">
             Kembali
         </a>

@@ -63,7 +63,22 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/grafik/data', [GrafikController::class, 'data'])->name('grafik.data');
     Route::get('/rtt/daerah-irigasi/{daerahIrigasi}', [RttController::class, 'showByDI'])->name('rtt.by-di');
     Route::resource('rtt', RttController::class)->except(['show']);
-    Route::resource('blangko-o01', BlangkoO01Controller::class);
+
+    Route::prefix('blangko-dip')->name('blangko-dip.')->middleware('permission:view blangko-op')->group(function () {
+        // O-01
+        Route::get('/o01', [BlangkoDipController::class, 'o01Index'])->name('o01.index');
+        Route::get('/o01/create', [BlangkoDipController::class, 'o01Create'])->name('o01.create')->middleware('permission:create blangko-op');
+        Route::post('/o01', [BlangkoDipController::class, 'o01Store'])->name('o01.store')->middleware('permission:create blangko-op');
+        Route::get('/o01/{o01}', [BlangkoDipController::class, 'o01Show'])->name('o01.show');
+        Route::get('/o01/{o01}/edit', [BlangkoDipController::class, 'o01Edit'])->name('o01.edit')->middleware('permission:edit blangko-op');
+        Route::put('/o01/{o01}', [BlangkoDipController::class, 'o01Update'])->name('o01.update')->middleware('permission:edit blangko-op');
+        Route::delete('/o01/{o01}', [BlangkoDipController::class, 'o01Destroy'])->name('o01.destroy')->middleware('permission:delete blangko-op');
+
+        // O-05
+        Route::get('/o05', [BlangkoDipController::class, 'o05'])->name('o05');
+        Route::get('/o05/pdf', [BlangkoDipController::class, 'o05Pdf'])->name('o05.pdf');
+    });
+
     Route::get('/kebutuhan-air', [KebutuhanAirController::class, 'index'])
         ->name('kebutuhan-air.index')
         ->middleware('permission:view blangko-op');

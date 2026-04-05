@@ -165,8 +165,8 @@
                 @endcan
 
                 @can('view blangko-op')
-                <a href="{{ route('blangko-o01.index') }}"
-                class="nav-item {{ request()->routeIs('blangko-o01.*') ? 'active' : '' }}" style="padding-left:1.5rem;">
+                <a href="{{ route('blangko-dip.o01.index') }}"
+                class="nav-item {{ request()->routeIs('blangko-dip.o01.*') ? 'active' : '' }}" style="padding-left:1.5rem;">
                     <span style="font-size:.9rem;margin-right:.65rem;">🌾</span> Luas Tanam
                 </a>
                 @endcan

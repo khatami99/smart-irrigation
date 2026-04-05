@@ -31,7 +31,7 @@
         <p style="font-size:.82rem;color:var(--textlt);margin-top:.2rem;">Usulan & keputusan luas tanam per Daerah Irigasi per Musim Tanam</p>
     </div>
     @can('create blangko-op')
-    <a href="{{ route('blangko-o01.create') }}"
+    <a href="{{ route('blangko-dip.o01.create') }}"
        style="background:var(--soil);color:var(--straw);padding:.65rem 1.4rem;border-radius:8px;font-size:.85rem;font-weight:600;text-decoration:none;"
        onmouseover="this.style.background='var(--soil2)'" onmouseout="this.style.background='var(--soil)'">
         + Input O-01
@@ -71,7 +71,7 @@
             <option value="revisi"    {{ request('status') === 'revisi'    ? 'selected' : '' }}>Perlu Revisi</option>
         </select>
         <button type="submit" style="background:var(--water);color:#fff;padding:.55rem 1.1rem;border-radius:8px;border:none;font-size:.85rem;font-weight:600;font-family:'Karla',sans-serif;cursor:pointer;">Filter</button>
-        <a href="{{ route('blangko-o01.index') }}" style="padding:.55rem 1rem;background:rgba(139,94,60,.08);border:1px solid var(--border);border-radius:8px;font-size:.82rem;font-weight:600;color:var(--textlt);text-decoration:none;">Reset</a>
+        <a href="{{ route('blangko-dip.o01.index') }}" style="padding:.55rem 1rem;background:rgba(139,94,60,.08);border:1px solid var(--border);border-radius:8px;font-size:.82rem;font-weight:600;color:var(--textlt);text-decoration:none;">Reset</a>
     </form>
 </div>
 
@@ -131,12 +131,12 @@
                     @canany(['edit blangko-op','delete blangko-op'])
                     <td style="text-align:center;">
                         <div style="display:flex;gap:.4rem;justify-content:center;">
-                            <a href="{{ route('blangko-o01.show', $item) }}" class="btn-sm btn-show">Detail</a>
+                            <a href="{{ route('blangko-dip.o01.show', $item) }}" class="btn-sm btn-show">Detail</a>
                             @can('edit blangko-op')
-                            <a href="{{ route('blangko-o01.edit', $item) }}" class="btn-sm btn-edit">Edit</a>
+                            <a href="{{ route('blangko-dip.o01.edit', $item) }}" class="btn-sm btn-edit">Edit</a>
                             @endcan
                             @can('delete blangko-op')
-                            <form method="POST" action="{{ route('blangko-o01.destroy', $item) }}" onsubmit="return confirm('Hapus O-01 ini?')">
+                            <form method="POST" action="{{ route('blangko-dip.o01.destroy', $item) }}" onsubmit="return confirm('Hapus O-01 ini?')">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="btn-sm btn-delete">Hapus</button>
                             </form>
