@@ -177,7 +177,7 @@ class BlangkoDipController extends Controller
 
     public function o05(Request $request)
     {
-        $daerahIrigasis = DaerahIrigasi::where('jenis_di', 'permukaan')
+        $daerahIrigasis = DaerahIrigasi::where('jenis', 'permukaan')
             ->where('status', 'aktif')
             ->orderBy('kode')
             ->get();

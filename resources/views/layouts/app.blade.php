@@ -164,10 +164,26 @@
                 </a>
                 @endcan
 
-                @can('view blangko-op')
+                {{-- @can('view blangko-op')
                 <a href="{{ route('blangko-dip.o01.index') }}"
                 class="nav-item {{ request()->routeIs('blangko-dip.o01.*') ? 'active' : '' }}" style="padding-left:1.5rem;">
                     <span style="font-size:.9rem;margin-right:.65rem;">🌾</span> Luas Tanam
+                </a>
+                @endcan --}}
+
+                {{-- PERENCANAAN --}}
+                @can('view blangko-op')
+                <a href="{{ route('blangko-dip.o01.index') }}"
+                class="nav-item {{ request()->routeIs('blangko-dip.o01*') ? 'active' : '' }}" style="padding-left:1.5rem;">
+                    <span style="font-size:.9rem;margin-right:.65rem;">🌾</span> Luas Tanam (O-01)
+                </a>
+                @endcan
+
+                {{-- Di bagian ANALISIS & LAPORAN --}}
+                @can('view blangko-op')
+                <a href="{{ route('blangko-dip.o05') }}"
+                class="nav-item {{ request()->routeIs('blangko-dip.o05*') ? 'active' : '' }}" style="padding-left:1.5rem;">
+                    <span style="font-size:.9rem;margin-right:.65rem;">📋</span> Blangko O-05 DIP
                 </a>
                 @endcan
 
