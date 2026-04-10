@@ -15,6 +15,7 @@ use App\Http\Controllers\SaluranController;
 use App\Http\Controllers\BlangkoO01Controller;
 use App\Http\Controllers\KebutuhanAirController;
 use App\Http\Controllers\BlangkoDipController;
+use App\Http\Controllers\BlangkoDirController;
 
 Route::get('/', function () {
     $latest = \App\Models\IrrigationData::orderBy('tanggal', 'desc')->first();
@@ -115,5 +116,12 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware('permission:delete peta')->group(function () {
         Route::delete('/peta/layer/{layer}', [PetaController::class, 'destroyLayer'])->name('peta.layer.destroy');
         Route::delete('/peta/feature/{feature}', [PetaController::class, 'destroyFeature'])->name('peta.feature.destroy');
+    });
+
+    Route::prefix('blangko-dir')->name('blangko-dir.')->middleware('permission:view blangko-op')->group(function () {
+        Route::get('/o09', [BlangkoDirController::class, 'o09Index'])->name('o09.index');
+        Route::get('/o09/create', [BlangkoDirController::class, 'o09Create'])->name('o09.create')->middleware('permission:create blangko-op');
+        Route::post('/o09', [BlangkoDirController::class, 'o09Store'])->name('o09.store')->middleware('permission:create blangko-op');
+        Route::get('/o09/pdf', [BlangkoDirController::class, 'o09Pdf'])->name('o09.pdf');
     });
 });
