@@ -74,7 +74,7 @@
             <tbody>
                 @forelse($items as $item)
                 <tr>
-                    <td><span style="font-family:'Courier New',monospace;font-size:.82rem;font-weight:700;color:var(--soil);background:var(--cream2);padding:.2rem .6rem;border-radius:5px;">{{ $item->kode }}</span></td>
+                    <td><span style="font-family:'Courier New',monospace;font-size:.82rem;font-weight:700;color:var(--soil);background:var(--cream2);padding:.2rem .6rem;border-radius:5px; white-space:nowrap;">{{ $item->kode }}</span></td>
                     <td style="font-weight:600;color:var(--soil);font-family:'Fraunces',serif;">{{ $item->nama }}</td>
                     <td style="text-align:center;">
                         @if($item->jenis === 'permukaan')

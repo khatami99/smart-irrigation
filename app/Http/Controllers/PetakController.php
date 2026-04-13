@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 use App\Models\Petak;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
+use App\Models\DaerahIrigasi;
 
 class PetakController extends BaseController
 {
@@ -28,7 +29,8 @@ class PetakController extends BaseController
 
     public function create()
     {
-        return view('petak.create');
+        $daerahIrigasis = DaerahIrigasi::orderBy('nama')->get();
+        return view('petak.create', compact('daerahIrigasis'));
     }
 
     public function store(Request $request)

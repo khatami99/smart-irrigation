@@ -39,7 +39,18 @@
 
             <div style="margin-bottom:1.5rem;">
                 <p class="section-label">📍 Identitas Petak</p>
-                <div style="display:grid;grid-template-columns:1fr 2fr;gap:1rem;">
+                <div style="display:grid;grid-template-columns:1fr 1fr 2fr;gap:1rem;">
+                    <div style="grid-column:1/-1;">
+                        <label class="form-label">Daerah Irigasi <span>*</span></label>
+                        <select name="daerah_irigasi_id" required class="form-input">
+                            <option value="">— Pilih Daerah Irigasi —</option>
+                            @foreach($daerahIrigasis as $di)
+                                <option value="{{ $di->id }}" {{ old('daerah_irigasi_id') == $di->id ? 'selected' : '' }}>
+                                    {{ $di->nama }} ({{ $di->jenis == 'permukaan' ? 'DIP' : 'DIR' }})
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
                     <div>
                         <label class="form-label">Kode Petak <span>*</span></label>
                         <input type="text" name="kode_petak" value="{{ old('kode_petak') }}"

@@ -61,6 +61,7 @@
                     <th style="text-align:left;">Kode</th>
                     <th style="text-align:left;">Nama Petak</th>
                     <th style="text-align:left;">Wilayah</th>
+                    <th style="text-align:left;">Daerah Irigasi</th>
                     <th style="text-align:center;">Luas (ha)</th>
                     <th style="text-align:left;">Pintu Air</th>
                     <th style="text-align:left;">Penanggung Jawab</th>
@@ -73,9 +74,10 @@
             <tbody>
                 @forelse($petaks as $petak)
                 <tr>
-                    <td><span style="font-family:'Courier New',monospace;font-size:.82rem;font-weight:700;color:var(--soil);background:var(--cream2);padding:.2rem .6rem;border-radius:5px;">{{ $petak->kode_petak }}</span></td>
+                    <td><span style="font-family:'Courier New',monospace;font-size:.82rem;font-weight:700;color:var(--soil);background:var(--cream2);padding:.2rem .6rem;border-radius:5px; white-space:nowrap;">{{ $petak->kode_petak }}</span></td>
                     <td style="font-weight:600;color:var(--soil);font-family:'Fraunces',serif;">{{ $petak->nama_petak }}</td>
                     <td>{{ $petak->lokasi_wilayah }}</td>
+                    <td>{{ $petak->daerahIrigasi->jenis == 'permukaan' ? 'DIP' : 'DIR' }} {{ $petak->daerahIrigasi->nama ?? '—' }}</td>
                     <td style="text-align:center;font-weight:600;color:var(--water);">{{ number_format($petak->luas_area, 2) }}</td>
                     <td>{{ $petak->pintu_air ?? '—' }}</td>
                     <td>{{ $petak->penanggung_jawab ?? '—' }}</td>
