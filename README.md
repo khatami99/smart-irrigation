@@ -1,173 +1,192 @@
-# 💧 Smart Irrigation System
+# 💧 Smart Irrigation Management System
 
-Sistem monitoring dan prediksi kebutuhan air irigasi rawa berbasis web, dilengkapi dengan model Machine Learning (Linear Regression) untuk memperkirakan kebutuhan air esok hari secara otomatis.
+> Sistem manajemen irigasi berbasis web yang mengintegrasikan standar teknis KP-01/FAO-56 dengan prediksi kebutuhan air menggunakan Machine Learning.
+
+![Laravel](https://img.shields.io/badge/Laravel-12-FF2D20?style=flat&logo=laravel&logoColor=white)
+![PHP](https://img.shields.io/badge/PHP-8.4-777BB4?style=flat&logo=php&logoColor=white)
+![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?style=flat&logo=mysql&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3.x-3776AB?style=flat&logo=python&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-green?style=flat)
 
 ---
 
-## 🚀 Fitur
+## 📋 Tentang Proyek
 
-- **Autentikasi** — Login & logout dengan proteksi middleware
-- **Dashboard Monitoring** — Visualisasi tren kebutuhan air dengan Chart.js
-- **Prediksi AI** — Estimasi kebutuhan air 24 jam ke depan menggunakan Linear Regression (Python)
-- **CRUD Data Irigasi** — Tambah, edit, dan hapus data harian
-- **Kalkulasi Otomatis** — ETo dihitung otomatis dengan metode **Penman-Monteith FAO-56**, ETc dan kebutuhan air menyesuaikan
-- **Preview Real-time** — Hasil kalkulasi ETo, ETc, dan kebutuhan air langsung terlihat saat mengisi form
-- **Pagination AJAX** — Navigasi tabel tanpa reload halaman
-- **Page Transition** — Loading overlay dan loading bar saat berpindah halaman
+Smart Irrigation Management System adalah aplikasi web untuk mendukung **perencanaan dan operasional irigasi** pada Daerah Irigasi Permukaan (DIP) dan Daerah Irigasi Rawa (DIR). Sistem ini mengimplementasikan standar teknis resmi Indonesia (KP-01, Permen PU No. 32/PRT/M/2007) dan metodologi FAO-56 untuk perhitungan kebutuhan air irigasi.
+
+Proyek ini dibangun sebagai **portfolio project** yang merepresentasikan sistem nyata yang digunakan oleh dinas irigasi/PUPR di lapangan.
+
+---
+
+## ✨ Fitur Utama
+
+### 🗂️ Master Data
+- **Daerah Irigasi** — CRUD DIP (permukaan) dan DIR (rawa) lengkap dengan atribut teknis (SKA, faktor tersier, pct kehilangan air)
+- **Petak Irigasi** — Manajemen petak tersier dengan koordinat GPS dan map picker interaktif
+- **Saluran** — Data jaringan saluran irigasi
+
+### 📅 Perencanaan
+- **Musim Tanam** — Manajemen periode tanam dengan status berjalan/selesai
+- **Luas Tanam O-01 (DIP)** — Blangko usulan luas tanam per DI per MT, CRUD lengkap
+- **Jadwal Tanam (RTT)** — Rencana Tata Tanam per petak dengan tracking fase pertumbuhan otomatis (FAO)
+
+### 🌾 Blangko Operasional
+| Kode | Nama | Jenis | Fitur |
+|------|------|-------|-------|
+| O-01 | Usulan Luas Tanam per DI | DIP | CRUD + otomatis hitung KP-01 |
+| O-05 | Rencana Kebutuhan Air di Pintu | DIP | View + Download PDF |
+| O-09 | Rencana/Realisasi Tanaman per Petak Tersier | DIR | CRUD + Download PDF |
+
+### 🌦️ Data Iklim
+- Input manual data iklim harian (suhu, kelembaban, angin, radiasi, curah hujan)
+- **Import CSV BMKG** dengan auto-deteksi kolom (mendukung berbagai format ekspor BMKG)
+- Kalkulasi otomatis ETo (FAO-56 Penman-Monteith), ETc, dan kebutuhan air
+
+### 🤖 Prediksi AI
+- **Linear Regression** dengan feature engineering (lag, rolling average, musiman)
+- Training terjadwal via **Laravel Scheduler** (tiap malam jam 00:00)
+- Evaluasi model: R² score dan RMSE
+- Threshold adaptif berbasis distribusi historis (Normal/Tinggi/Rendah)
+
+### 📊 Analisis & Laporan
+- **Kebutuhan Air KP-01** — Rekap hasil perhitungan per DI per MT per dekade
+- **Grafik** — Visualisasi tren kebutuhan air 30 hari terakhir
+- **Laporan** — Export PDF dan Excel (data iklim, blangko OP, RTT, rekap)
+
+### 🗺️ Peta Interaktif
+- Visualisasi Daerah Irigasi dengan **Leaflet.js**
+- Import GeoJSON, tambah/edit layer dan feature polygon
+- Status RTT per DI ditampilkan dengan kode warna (rencana/berjalan/selesai/terlambat)
+
+### 🔐 Autentikasi & Otorisasi
+- Role-based access control menggunakan **Spatie Laravel Permission**
+- Permission granular per fitur (view/create/edit/delete)
 
 ---
 
 ## 🛠️ Tech Stack
 
 | Layer | Teknologi |
-|---|---|
-| Backend | Laravel 12 (PHP) |
-| Frontend | Blade + Tailwind CSS |
-| Database | MySQL |
-| Machine Learning | Python (Linear Regression) |
-| Chart | Chart.js |
-| Server Lokal | Laragon |
+|-------|-----------|
+| Backend | Laravel 12, PHP 8.4 |
+| Frontend | Blade, Vanilla JS, Chart.js |
+| Database | MySQL 8 |
+| Maps | Leaflet.js |
+| PDF | barryvdh/laravel-dompdf |
+| Permission | Spatie Laravel Permission |
+| AI/ML | Python 3, scikit-learn, pandas, SQLAlchemy |
+| Dev Environment | Laragon |
 
 ---
 
-## ⚙️ Instalasi
+## 📐 Standar Teknis yang Diimplementasi
 
-### 1. Clone repository
+- **KP-01** — Kriteria Perencanaan Irigasi (perhitungan kebutuhan air per dekade)
+- **FAO-56** — Penman-Monteith untuk kalkulasi ETo
+- **Permen PU No. 32/PRT/M/2007** — Format blangko operasional irigasi
+
+---
+
+## 🚀 Cara Instalasi
+
+### Prasyarat
+- PHP >= 8.2
+- Composer
+- MySQL
+- Python 3 + pip
+- Node.js (opsional, untuk asset)
+
+### Langkah Instalasi
 
 ```bash
+# 1. Clone repository
 git clone https://github.com/khatami99/smart-irrigation.git
 cd smart-irrigation
-```
 
-### 2. Install dependencies
-
-```bash
+# 2. Install dependencies PHP
 composer install
-npm install
-```
 
-### 3. Konfigurasi environment
-
-```bash
+# 3. Copy environment file
 cp .env.example .env
+
+# 4. Generate application key
 php artisan key:generate
-```
 
-Edit file `.env` sesuaikan konfigurasi database:
-
-```env
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
+# 5. Konfigurasi database di .env
 DB_DATABASE=smart_irrigation
 DB_USERNAME=root
 DB_PASSWORD=
-```
 
-### 4. Jalankan migration
+# 6. Jalankan migration dan seeder
+php artisan migrate --seed
 
-```bash
-php artisan migrate
-```
+# 7. Install dependencies Python (untuk fitur AI)
+pip install pandas sqlalchemy scikit-learn numpy mysql-connector-python
 
-### 5. Buat user pertama
+# 8. Jalankan prediksi AI pertama kali (manual)
+php artisan ai:prediksi
 
-```bash
-php artisan tinker
-\App\Models\User::create([
-    'name' => 'Admin',
-    'email' => 'admin@example.com',
-    'password' => bcrypt('password123'),
-]);
-```
-
-### 6. Jalankan aplikasi
-
-```bash
+# 9. Jalankan server
 php artisan serve
 ```
 
-Atau akses langsung via Laragon di `http://smart-irrigation.test`
+### Setup Scheduler (Production)
+Tambahkan cron job berikut di server untuk mengaktifkan Laravel Scheduler:
+```
+* * * * * cd /path/to/project && php artisan schedule:run >> /dev/null 2>&1
+```
+Scheduler akan otomatis menjalankan training AI setiap malam pukul 00:00.
 
 ---
 
-## 📐 Kalkulasi ETo (Penman-Monteith FAO-56)
-
-ETo dihitung otomatis dari data iklim yang diinput:
-
-| Parameter Input | Satuan |
-|---|---|
-| Suhu Maksimum | °C |
-| Suhu Minimum | °C |
-| Kelembaban Udara | % |
-| Kecepatan Angin | m/s |
-| Radiasi Matahari | MJ/m²/hari |
-| Koefisien Tanaman (Kc) | - |
-| Curah Hujan | mm |
-
-**Rumus:**
-```
-ETc  = ETo × Kc
-Kebutuhan Air = ETc - (Curah Hujan × 0.8)
-```
-
----
-
-## 📁 Struktur Direktori Penting
+## 📁 Struktur Modul
 
 ```
 app/
+├── Console/Commands/
+│   └── PrediksiAI.php          # Artisan command training AI
 ├── Http/Controllers/
-│   ├── AuthController.php
-│   └── IrrigationController.php
+│   ├── BlangkoDipController.php # Blangko DIP (O-01, O-05)
+│   ├── BlangkoDirController.php # Blangko DIR (O-09)
+│   ├── IrrigationController.php # Dashboard + Data Iklim
+│   └── ...
+├── Models/
+│   ├── DaerahIrigasi.php
+│   ├── Petak.php
+│   ├── RttDir.php
+│   ├── AiPrediction.php
+│   └── ...
 ├── Services/
-│   └── IrrigationDataService.php   ← kalkulasi ETo
-└── Models/
-    └── IrrigationData.php
-
-resources/views/
-├── layouts/
-│   └── app.blade.php               ← layout utama
-├── irrigation/
-│   ├── index.blade.php             ← dashboard
-│   ├── create.blade.php            ← form tambah data
-│   ├── edit.blade.php              ← form edit data
-│   └── partials/
-│       └── table.blade.php         ← tabel AJAX
-└── auth/
-    └── login.blade.php
+│   ├── KpSatuService.php        # Kalkulasi KP-01
+│   └── IrrigationDataService.php # ETo/ETc FAO-56
+predict.py                       # Script Linear Regression (Python)
 ```
+
+---
+
+## 🔮 Roadmap
+
+- [ ] Blangko DIP: O-02, O-04, O-07, O-09, O-10
+- [ ] Blangko DIR: O-01, O-03, O-05, O-06, O-07, O-08, O-12
+- [ ] BMKG API auto-fetch (realtime climate data)
+- [ ] Leaflet Draw — digitasi polygon petak langsung di peta
+- [ ] Dashboard command center terintegrasi semua modul
+- [ ] Upgrade model AI (Random Forest / XGBoost)
 
 ---
 
 ## 👤 Author
 
-**Muhammad Sauqi Khatami** — Sistem Irigasi Rawa berbasis AI  
-[github.com/khatami99](https://github.com/khatami99)
+**Muhammad Sauqi Khatami**
+- GitHub: [@khatami99](https://github.com/khatami99)
+- Email: sauqikhatami084@gmail.com
 
 ---
 
 ## 📄 Lisensi
 
-MIT License
+Proyek ini menggunakan lisensi [MIT](LICENSE).
 
-Copyright (c) 2026 Muhammad Sauqi Khatami
+---
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-
+> *Dibangun dengan harapan dan semangat membantu modernisasi pengelolaan irigasi Indonesia.*

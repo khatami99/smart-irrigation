@@ -13,21 +13,25 @@ class IrrigationController extends Controller
      public function index()
     {
         // ── Prediksi AI ─────────────────────────────────────────
-        $pythonPath = base_path('predict.py');
-        $output     = shell_exec("python $pythonPath");
-        // dd($output);
+        // $pythonPath = base_path('predict.py');
+        // $output     = shell_exec("python $pythonPath");
+        // // dd($output);
 
-        preg_match('/Prediksi Kebutuhan Air Besok: ([\d.]+)/', $output, $m1);
-        preg_match('/Akurasi Model R2: ([\d.]+)/',             $output, $m2);
-        preg_match('/RMSE: ([\d.]+)/',                         $output, $m3);
+        // preg_match('/Prediksi Kebutuhan Air Besok: ([\d.]+)/', $output, $m1);
+        // preg_match('/Akurasi Model R2: ([\d.]+)/',             $output, $m2);
+        // preg_match('/RMSE: ([\d.]+)/',                         $output, $m3);
 
-        $forecast  = (float) ($m1[1] ?? 0.0);
+        // $forecast  = (float) ($m1[1] ?? 0.0);
 
-        Log::info('Prediksi AI', [
-            'forecast' => $forecast,
-            'r2'       => (float) ($m2[1] ?? 0.0),
-            'rmse'     => (float) ($m3[1] ?? 0.0),
-        ]);
+        // Log::info('Prediksi AI', [
+        //     'forecast' => $forecast,
+        //     'r2'       => (float) ($m2[1] ?? 0.0),
+        //     'rmse'     => (float) ($m3[1] ?? 0.0),
+        // ]);
+
+        // Prediksi Kebutuhan Air Besok
+        $aiPrediction = \App\Models\AiPrediction::latest('trained_at')->first();
+        $forecast     = (float) ($aiPrediction?->prediksi ?? 0);
 
         // ── Threshold adaptif berdasarkan distribusi data historis ──
         $stats  = IrrigationData::selectRaw('AVG(kebutuhan_air) as avg, STDDEV(kebutuhan_air) as stddev')->first();
