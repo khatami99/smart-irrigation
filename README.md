@@ -15,6 +15,7 @@
 Smart Irrigation Management System adalah aplikasi web untuk mendukung **perencanaan dan operasional irigasi** pada Daerah Irigasi Permukaan (DIP) dan Daerah Irigasi Rawa (DIR). Sistem ini mengimplementasikan standar teknis resmi Indonesia (KP-01, Permen PU No. 32/PRT/M/2007) dan metodologi FAO-56 untuk perhitungan kebutuhan air irigasi.
 
 Proyek ini dibangun sebagai **portfolio project** yang merepresentasikan sistem nyata yang digunakan oleh dinas irigasi/PUPR di lapangan.
+<img width="1366" height="768" alt="Screenshot (2243)" src="https://github.com/user-attachments/assets/b22238c3-9538-4ddf-ab4c-4f9bda906013" />
 
 ---
 
@@ -24,11 +25,20 @@ Proyek ini dibangun sebagai **portfolio project** yang merepresentasikan sistem 
 - **Daerah Irigasi** — CRUD DIP (permukaan) dan DIR (rawa) lengkap dengan atribut teknis (SKA, faktor tersier, pct kehilangan air)
 - **Petak Irigasi** — Manajemen petak tersier dengan koordinat GPS dan map picker interaktif
 - **Saluran** — Data jaringan saluran irigasi
+<img width="1366" height="768" alt="Screenshot (2247)" src="https://github.com/user-attachments/assets/a70cf875-8f8e-42cc-8957-882971b312ed" />
+<img width="1366" height="768" alt="Screenshot (2258)" src="https://github.com/user-attachments/assets/9bfa9f40-671f-49db-9284-b0de29be186b" />
+
 
 ### 📅 Perencanaan
 - **Musim Tanam** — Manajemen periode tanam dengan status berjalan/selesai
 - **Luas Tanam O-01 (DIP)** — Blangko usulan luas tanam per DI per MT, CRUD lengkap
 - **Jadwal Tanam (RTT)** — Rencana Tata Tanam per petak dengan tracking fase pertumbuhan otomatis (FAO)
+<img width="1366" height="768" alt="Screenshot (2252)" src="https://github.com/user-attachments/assets/7e65baad-1e21-484d-8ec4-33db417f6a95" />
+<img width="1366" height="768" alt="Screenshot (2253)" src="https://github.com/user-attachments/assets/a013f064-290a-4e95-be47-8467812e06e6" />
+<img width="1366" height="768" alt="Screenshot (2254)" src="https://github.com/user-attachments/assets/57f97ec6-990a-4e95-b40d-751135cb167c" />
+<img width="1366" height="768" alt="Screenshot (2255)" src="https://github.com/user-attachments/assets/c39cb611-791b-4b5e-bec2-606fe41a04b6" />
+<img width="1366" height="768" alt="Screenshot (2256)" src="https://github.com/user-attachments/assets/d336f043-bf0d-459e-afd1-21f0953f0a83" />
+
 
 ### 🌾 Blangko Operasional
 | Kode | Nama | Jenis | Fitur |
