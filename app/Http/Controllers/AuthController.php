@@ -33,6 +33,33 @@ class AuthController extends Controller
         ])->onlyInput('email');
     }
 
+    public function profilEdit()
+    {
+        return view('auth.profil', ['user' => Auth::user()]);
+    }
+
+    public function profilUpdate(Request $request)
+    {
+        $user = Auth::user();
+
+        $request->validate([
+            'name'                  => 'required|string|max:255',
+            'email'                 => 'required|email|unique:users,email,' . $user->id,
+            'password'              => 'nullable|min:8|confirmed',
+        ]);
+
+        $user->name  = $request->name;
+        $user->email = $request->email;
+
+        if ($request->filled('password')) {
+            $user->password = bcrypt($request->password);
+        }
+
+        $user->save();
+
+        return back()->with('success', 'Profil berhasil diperbarui.');
+    }
+
     public function logout(Request $request)
     {
         Auth::logout();

@@ -276,7 +276,7 @@
             {{-- Dropdown Menu --}}
             <div id="profile-dropdown"
                 style="display:none;position:absolute;right:0;top:calc(100% + .5rem);background:var(--cream);border:1px solid var(--border);border-radius:10px;box-shadow:0 4px 20px rgba(61,43,31,.1);min-width:180px;z-index:100;overflow:hidden;">
-                <a href="#"
+                <a href="{{ route('profil.edit') }}"
                     style="display:flex;align-items:center;gap:.65rem;padding:.75rem 1rem;font-size:.85rem;color:var(--text);text-decoration:none;transition:background .2s;"
                     onmouseover="this.style.background='rgba(139,94,60,.06)'"
                     onmouseout="this.style.background='none'">

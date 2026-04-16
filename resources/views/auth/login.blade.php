@@ -174,7 +174,7 @@
     {{-- Left Visual --}}
     <div class="login-visual">
         <div class="visual-content">
-            <div class="visual-logo">💧 Smart<span>Irigasi</span></div>
+            <a href="{{ url('/') }}" class="visual-logo">💧 Smart <span> Irigasi </span></a>
             <div class="visual-tagline">
                 Kelola irigasi<br>lebih <em>cerdas</em>
             </div>

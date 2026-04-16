@@ -124,4 +124,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/o09', [BlangkoDirController::class, 'o09Store'])->name('o09.store')->middleware('permission:create blangko-op');
         Route::get('/o09/pdf', [BlangkoDirController::class, 'o09Pdf'])->name('o09.pdf');
     });
+
+    Route::get('/profil', [AuthController::class, 'profilEdit'])->name('profil.edit');
+    Route::put('/profil', [AuthController::class, 'profilUpdate'])->name('profil.update');
 });

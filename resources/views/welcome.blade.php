@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Irrigation System — Irigasi Rawa Pintar Berbasis AI</title>
+    <title>Smart Irrigation System — Irigasi Pintar</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=Karla:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -408,7 +408,7 @@
 
     <!-- Nav -->
     <nav id="navbar">
-        <div class="nav-logo">💧 Smart Irigasi</div>
+        <a href="{{ url('/') }}" class="nav-logo">💧 Smart Irigasi</a>
         <div class="nav-links">
             <a href="#fitur">Fitur</a>
             <a href="#metode">Metode</a>
@@ -420,13 +420,13 @@
     <div style="max-width:1200px;margin:0 auto;padding:7rem 3rem 4rem;display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;min-height:100vh;" class="hero-grid">
         <!-- Left -->
         <div>
-            <div class="hero-eyebrow">Sistem Monitoring Irigasi Rawa</div>
+            <div class="hero-eyebrow">Sistem Monitoring Irigasi</div>
             <h1 class="hero-title">
                 Irigasi Lebih Cerdas,<br>
                 Panen <em>Lebih Baik</em>
             </h1>
             <p class="hero-sub">
-                Kalkulasi kebutuhan air otomatis dengan metode Penman-Monteith FAO-56, prediksi AI harian, dan monitoring real-time — khusus untuk lahan rawa Indonesia.
+                Kalkulasi kebutuhan air otomatis dengan metode Penman-Monteith FAO-56 dan prediksi kebutuhan air harian — khusus untuk lahan irigasi Indonesia.
             </p>
             <div class="hero-btns">
                 <a href="{{ route('login') }}" class="btn-primary">Buka Dashboard →</a>
@@ -598,7 +598,7 @@
     </div>
 
     <!-- Tech -->
-    <section class="section-cream section-pad">
+    {{-- <section class="section-cream section-pad">
         <div class="container">
             <div class="reveal">
                 <div class="section-label">Tech Stack</div>
@@ -618,13 +618,14 @@
             </div>
         </div>
     </section>
+ --}}
 
     <!-- CTA -->
     <section class="cta-section">
         <div class="cta-content reveal">
             <div style="font-size:.72rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--water2);margin-bottom:.75rem;">Siap Digunakan</div>
-            <h2 class="cta-title">Mulai monitoring<br>irigasi rawamu hari ini</h2>
-            <p class="cta-sub">Dibuat oleh <strong style="color:var(--straw)">Muhammad Sauqi Khatami</strong> dari Banjarmasin — untuk mendukung pertanian cerdas di lahan rawa Indonesia.</p>
+            <h2 class="cta-title">Mulai monitoring<br>irigasi hari ini</h2>
+            <p class="cta-sub">Dibuat oleh <strong style="color:var(--straw)">Muhammad Sauqi Khatami</strong> dari Banjarmasin — untuk mendukung pertanian cerdas di lahan Indonesia.</p>
             <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
                 <a href="{{ route('login') }}" class="btn-light">Buka Dashboard →</a>
                 <a href="https://github.com/khatami99/smart-irrigation" target="_blank" class="btn-outline-light">GitHub ↗</a>
